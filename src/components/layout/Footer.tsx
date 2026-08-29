@@ -5,47 +5,7 @@ import { UtensilsCrossed, Heart, Shield, Award, Sparkles, Database, Server, Smar
 export default function Footer() {
   return (
     <footer className="bg-slate-950 text-slate-400 text-sm border-t border-slate-800">
-      {/* Top Value Banner */}
-      <div className="border-b border-slate-800/80 bg-slate-900/40">
-        <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-          <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-brand-500/10 text-brand-400 flex items-center justify-center shrink-0">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-white font-bold text-sm">Super Fast Delivery</h4>
-              <p className="text-xs text-slate-400">Average 25-35 mins delivery in Dhaka</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
-              <Shield className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-white font-bold text-sm">Secure Transactions</h4>
-              <p className="text-xs text-slate-400">Encrypted bKash, Nagad & Card payments</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0">
-              <Database className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-white font-bold text-sm">PostgreSQL Backed</h4>
-              <p className="text-xs text-slate-400">ACID compliant & optimized indexing</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center shrink-0">
-              <Server className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-white font-bold text-sm">Vercel Edge Ready</h4>
-              <p className="text-xs text-slate-400">Ultra-low latency serverless architecture</p>
-            </div>
-          </div>
-        </div>
-      </div>
+
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -60,10 +20,7 @@ export default function Footer() {
             <p className="text-xs leading-relaxed text-slate-400">
               A modern, hyper-fast online food ordering and delivery system engineered for high availability, real-time tracking, and multi-tenant management.
             </p>
-            <div className="pt-2 text-xs text-slate-400">
-              <p className="font-semibold text-slate-300">Software Engineering Lab Project</p>
-              <p>Course: CSTE3310 | NSTU</p>
-            </div>
+
           </div>
 
           {/* Col 2 */}
@@ -84,7 +41,6 @@ export default function Footer() {
               <li><Link href="/restaurant" className="hover:text-white transition-colors">Restaurant Manager Dashboard</Link></li>
               <li><Link href="/delivery" className="hover:text-white transition-colors">Delivery Rider Portal</Link></li>
               <li><Link href="/admin" className="hover:text-white transition-colors">System Admin Console</Link></li>
-              <li><span className="text-slate-400">PostgreSQL + Prisma Studio Ready</span></li>
             </ul>
           </div>
 
@@ -101,9 +57,6 @@ export default function Footer() {
 
         <div className="mt-12 pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-4">
           <p>© 2026 QuickBite Food Express. All rights reserved.</p>
-          <div className="flex items-center gap-1 text-slate-400">
-            Built with Next.js, TypeScript, Tailwind & PostgreSQL
-          </div>
         </div>
       </div>
     </footer>

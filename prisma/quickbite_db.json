@@ -50,6 +50,28 @@
       "address": "Uttara Sector 11, Dhaka",
       "role": "CUSTOMER",
       "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Fahim%20Hasan"
+    },
+    {
+      "id": "user_1788037144333_677",
+      "name": "Tanvir Ahmed",
+      "email": "tanvir@gmail.com",
+      "password": "1234",
+      "phone": "01811111111",
+      "address": "House 412, Road 11, Dhanmondi, Dhaka, Dhaka",
+      "role": "DELIVERY_PERSON",
+      "isApproved": true,
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Tanvir%20Ahmed"
+    },
+    {
+      "id": "user_1788037477538_615",
+      "name": "Nusrat Jahan",
+      "email": "nusrat@gmail.com",
+      "password": "12345678",
+      "phone": "01812345678",
+      "address": "Housing, Maijdee, Noakhali, Chattogram",
+      "role": "ADMIN",
+      "isApproved": true,
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Nusrat%20Jahan"
     }
   ],
   "restaurants": [

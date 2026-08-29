@@ -65,6 +65,24 @@ export default function AdminConsolePage() {
     setRestaurants(restaurants.map(r => (r.id === restId ? { ...r, isApproved: !r.isApproved } : r)));
   };
 
+  const handleApproveUser = async (userId: string) => {
+    try {
+      const res = await fetch('/api/auth/users', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: userId, isApproved: true }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setUsers(users.map(u => (u.id === userId ? { ...u, isApproved: true } : u)));
+        // Refresh KPI metrics count
+        fetchAdminData();
+      }
+    } catch (e) {
+      console.error('Failed to approve user', e);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 pb-20">
       
@@ -231,7 +249,7 @@ export default function AdminConsolePage() {
                   <th className="p-4">Email</th>
                   <th className="p-4">Role</th>
                   <th className="p-4">Phone</th>
-                  <th className="p-4 pr-6">Status</th>
+                  <th className="p-4 pr-6 text-right">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
@@ -255,10 +273,24 @@ export default function AdminConsolePage() {
                       </span>
                     </td>
                     <td className="p-4">{u.phone || 'N/A'}</td>
-                    <td className="p-4 pr-6">
-                      <span className="inline-flex items-center gap-1 text-emerald-600 font-bold">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Active
-                      </span>
+                    <td className="p-4 pr-6 text-right">
+                      {u.isApproved === false ? (
+                        <div className="flex items-center justify-end gap-2.5">
+                          <span className="inline-flex items-center gap-1 text-amber-600 font-bold bg-amber-50 border border-amber-200/50 px-2 py-0.5 rounded text-[10px]">
+                            Pending
+                          </span>
+                          <button
+                            onClick={() => handleApproveUser(u.id)}
+                            className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10px] font-bold transition-all shadow-sm shadow-emerald-500/10"
+                          >
+                            Approve
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-emerald-600 font-bold bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Approved
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))}

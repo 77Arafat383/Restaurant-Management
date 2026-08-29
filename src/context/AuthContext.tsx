@@ -20,7 +20,7 @@ interface AuthContextType {
     phone?: string;
     address?: string;
     role?: UserRole;
-  }) => Promise<{ success: boolean; error?: string }>;
+  }) => Promise<{ success: boolean; error?: string; pendingApproval?: boolean }>;
   logout: () => void;
   switchRole: (role: UserRole) => void;
   availableUsers: User[];
@@ -101,7 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     phone?: string;
     address?: string;
     role?: UserRole;
-  }): Promise<{ success: boolean; error?: string }> => {
+  }): Promise<{ success: boolean; error?: string; pendingApproval?: boolean }> => {
     try {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
@@ -110,11 +110,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       const data = await res.json();
-      if (data.success && data.data) {
-        setCurrentUser(data.data);
-        localStorage.setItem('quickbite_user_session', JSON.stringify(data.data));
-        setAvailableUsers(prev => [data.data, ...prev]);
-        closeAuthModal();
+      if (data.success) {
+        if (data.pendingApproval) {
+          // Do not log in, but refresh user list so it's active
+          fetch('/api/auth/users')
+            .then(res => res.json())
+            .then(userData => {
+              if (userData.success && Array.isArray(userData.data)) {
+                setAvailableUsers(userData.data);
+              }
+            })
+            .catch(() => {});
+          return { success: true, pendingApproval: true };
+        }
+
+        if (data.data) {
+          setCurrentUser(data.data);
+          localStorage.setItem('quickbite_user_session', JSON.stringify(data.data));
+          setAvailableUsers(prev => [data.data, ...prev]);
+          closeAuthModal();
+        }
         return { success: true };
       } else {
         return { success: false, error: data.error || 'Registration failed.' };

@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
-import RoleBanner from '@/components/layout/RoleBanner';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import CartDrawer from '@/components/cart/CartDrawer';
@@ -31,7 +30,6 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col font-sans">
         <AuthProvider>
           <CartProvider>
-            <RoleBanner />
             <Navbar />
             <main className="flex-1">
               {children}

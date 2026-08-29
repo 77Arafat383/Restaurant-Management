@@ -21,6 +21,14 @@ export async function POST(req: Request) {
       );
     }
 
+    // Check approval status for partners
+    if (user.isApproved === false) {
+      return NextResponse.json(
+        { success: false, error: 'Your partner account registration is pending admin approval.' },
+        { status: 403 }
+      );
+    }
+
     // Check password
     if (user.password && user.password !== password) {
       return NextResponse.json(

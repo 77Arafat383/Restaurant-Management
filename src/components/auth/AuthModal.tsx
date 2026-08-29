@@ -86,6 +86,7 @@ export default function AuthModal() {
   const [regDistrict, setRegDistrict] = useState('');
   const [regUpazila, setRegUpazila] = useState('');
   const [regStreet, setRegStreet] = useState('');
+  const [regType, setRegType] = useState<'CUSTOMER' | 'PARTNER'>('CUSTOMER');
   const [regRole, setRegRole] = useState<UserRole>('CUSTOMER');
 
   // Synchronize internal tab when context opens with a specific tab
@@ -137,6 +138,7 @@ export default function AuthModal() {
     }
 
     const fullAddress = `${regStreet.trim()}, ${regUpazila.trim()}, ${regDistrict.trim()}, ${regDivision}`;
+    const assignedRole = regType === 'CUSTOMER' ? 'CUSTOMER' : regRole;
 
     setIsLoading(true);
     setErrorMessage(null);
@@ -147,14 +149,18 @@ export default function AuthModal() {
       password: regPassword,
       phone: regPhone.trim() || '+880 1711-000000',
       address: fullAddress,
-      role: regRole,
+      role: assignedRole,
     });
 
     setIsLoading(false);
     if (!result.success) {
       setErrorMessage(result.error || 'Failed to create account.');
     } else {
-      setSuccessMessage('Account created successfully! Welcome to QuickBite.');
+      if (result.pendingApproval) {
+        setSuccessMessage('Your Partner registration request was submitted successfully! It is pending approval by the Admin.');
+      } else {
+        setSuccessMessage('Account created successfully! Welcome to QuickBite.');
+      }
     }
   };
 
@@ -315,154 +321,221 @@ export default function AuthModal() {
 
           {/* Tab 2: REGISTER / CREATE ACCOUNT */}
           {activeTab === 'register' && (
-            <form onSubmit={handleRegisterSubmit} className="space-y-3.5 max-h-[65vh] overflow-y-auto pr-1">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Full Name *</label>
-                <div className="relative">
-                  <UserIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    required
-                    value={regName}
-                    onChange={(e) => setRegName(e.target.value)}
-                    placeholder="e.g. Tanvir Ahmed"
-                    className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-800"
-                  />
+            successMessage ? (
+              <div className="py-8 text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center mx-auto border border-emerald-100 shadow-sm">
+                  <CheckCircle2 className="w-8 h-8" />
                 </div>
+                <h3 className="text-lg font-black text-slate-900 font-outfit">Registration Request Logged</h3>
+                <p className="text-xs text-slate-500 leading-relaxed font-semibold font-inter max-w-sm mx-auto">
+                  {successMessage}
+                </p>
+                <button
+                  onClick={() => {
+                    closeAuthModal();
+                    setSuccessMessage(null);
+                  }}
+                  className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all shadow-md mt-2"
+                >
+                  Got it, close
+                </button>
               </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Email Address *</label>
-                <div className="relative">
-                  <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="email"
-                    required
-                    value={regEmail}
-                    onChange={(e) => setRegEmail(e.target.value)}
-                    placeholder="e.g. tanvir@example.com"
-                    className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-800"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            ) : (
+              <form onSubmit={handleRegisterSubmit} className="space-y-3.5 max-h-[65vh] overflow-y-auto pr-1">
+                {/* Customer vs Partner Selector */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Password *</label>
-                  <div className="relative">
-                    <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      required
-                      value={regPassword}
-                      onChange={(e) => setRegPassword(e.target.value)}
-                      placeholder="Min 4 characters"
-                      className="w-full pl-10 pr-9 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-800"
-                    />
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">Register As</label>
+                  <div className="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl">
                     <button
                       type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      onClick={() => { setRegType('CUSTOMER'); setRegRole('CUSTOMER'); }}
+                      className={`py-2 text-xs font-bold rounded-lg transition-all ${
+                        regType === 'CUSTOMER'
+                          ? 'bg-white text-slate-900 shadow-sm'
+                          : 'text-slate-500 hover:text-slate-700'
+                      }`}
                     >
-                      {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      🍴 Customer
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setRegType('PARTNER'); setRegRole('RESTAURANT_MANAGER'); }}
+                      className={`py-2 text-xs font-bold rounded-lg transition-all ${
+                        regType === 'PARTNER'
+                          ? 'bg-white text-slate-900 shadow-sm'
+                          : 'text-slate-500 hover:text-slate-700'
+                      }`}
+                    >
+                      🏪 Partner
                     </button>
                   </div>
                 </div>
 
+                {/* If Partner, choose role */}
+                {regType === 'PARTNER' && (
+                  <div className="space-y-1.5 animate-fade-in">
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Partner Role *</label>
+                    <select
+                      value={regRole}
+                      onChange={(e) => setRegRole(e.target.value as UserRole)}
+                      className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-800 bg-white"
+                    >
+                      <option value="RESTAURANT_MANAGER">Kitchen Manager (Restaurant Partner)</option>
+                      <option value="DELIVERY_PERSON">Delivery Rider (Logistics Partner)</option>
+                      <option value="ADMIN">System Administrator (Admin Console)</option>
+                    </select>
+                    <p className="text-[10px] text-amber-600 font-bold leading-relaxed">
+                      * Note: Partner registrations must be manually approved by the administrator before you can sign in.
+                    </p>
+                  </div>
+                )}
+
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Phone Number</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Full Name *</label>
                   <div className="relative">
-                    <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <UserIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
-                      type="tel"
-                      value={regPhone}
-                      onChange={(e) => setRegPhone(e.target.value)}
-                      placeholder="+880 17..."
+                      type="text"
+                      required
+                      value={regName}
+                      onChange={(e) => setRegName(e.target.value)}
+                      placeholder="e.g. Tanvir Ahmed"
                       className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-800"
                     />
                   </div>
                 </div>
-              </div>
 
-              <div className="space-y-3">
-                <label className="block text-xs font-bold text-slate-700 mb-1">Delivery Address (Bangladesh)</label>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-500 mb-1">Division *</label>
-                    <select
-                      value={regDivision}
-                      onChange={(e) => setRegDivision(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-800 bg-white"
-                    >
-                      <option value="Dhaka">Dhaka</option>
-                      <option value="Chattogram">Chattogram</option>
-                      <option value="Rajshahi">Rajshahi</option>
-                      <option value="Khulna">Khulna</option>
-                      <option value="Barishal">Barishal</option>
-                      <option value="Sylhet">Sylhet</option>
-                      <option value="Rangpur">Rangpur</option>
-                      <option value="Mymensingh">Mymensingh</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-500 mb-1">District *</label>
-                    <select
-                      value={regDistrict}
-                      onChange={(e) => setRegDistrict(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-800 bg-white"
-                    >
-                      {(DISTRICTS_BY_DIVISION[regDivision] || []).map((dist) => (
-                        <option key={dist} value={dist}>
-                          {dist}
-                        </option>
-                      ))}
-                    </select>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Email Address *</label>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="email"
+                      required
+                      value={regEmail}
+                      onChange={(e) => setRegEmail(e.target.value)}
+                      placeholder="e.g. tanvir@example.com"
+                      className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-800"
+                    />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-500 mb-1">Town / Area / Upazila *</label>
-                    <input
-                      type="text"
-                      required
-                      value={regUpazila}
-                      onChange={(e) => setRegUpazila(e.target.value)}
-                      placeholder="e.g. Dhanmondi, Maijdee"
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-800"
-                    />
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Password *</label>
+                    <div className="relative">
+                      <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        required
+                        value={regPassword}
+                        onChange={(e) => setRegPassword(e.target.value)}
+                        placeholder="Min 4 characters"
+                        className="w-full pl-10 pr-9 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-800"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      >
+                        {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-500 mb-1">House / Road / Flat / Street *</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Phone Number</label>
                     <div className="relative">
-                      <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
-                        type="text"
-                        required
-                        value={regStreet}
-                        onChange={(e) => setRegStreet(e.target.value)}
-                        placeholder="e.g. House 42, Road 11"
-                        className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-800"
+                        type="tel"
+                        value={regPhone}
+                        onChange={(e) => setRegPhone(e.target.value)}
+                        placeholder="+880 17..."
+                        className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-800"
                       />
                     </div>
                   </div>
                 </div>
-              </div>
 
+                <div className="space-y-3">
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Delivery Address (Bangladesh)</label>
 
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">Division *</label>
+                      <select
+                        value={regDivision}
+                        onChange={(e) => setRegDivision(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-800 bg-white"
+                      >
+                        <option value="Dhaka">Dhaka</option>
+                        <option value="Chattogram">Chattogram</option>
+                        <option value="Rajshahi">Rajshahi</option>
+                        <option value="Khulna">Khulna</option>
+                        <option value="Barishal">Barishal</option>
+                        <option value="Sylhet">Sylhet</option>
+                        <option value="Rangpur">Rangpur</option>
+                        <option value="Mymensingh">Mymensingh</option>
+                      </select>
+                    </div>
 
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full py-3.5 bg-gradient-to-r from-brand-500 to-amber-500 hover:from-brand-600 hover:to-amber-600 disabled:opacity-50 text-white font-bold text-sm rounded-xl shadow-lg shadow-brand-500/25 flex items-center justify-center gap-2 transition-all mt-2"
-              >
-                {isLoading ? 'Creating Account...' : 'Complete Registration'}
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </form>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">District *</label>
+                      <select
+                        value={regDistrict}
+                        onChange={(e) => setRegDistrict(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-800 bg-white"
+                      >
+                        {(DISTRICTS_BY_DIVISION[regDivision] || []).map((dist) => (
+                          <option key={dist} value={dist}>
+                            {dist}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">Town / Area / Upazila *</label>
+                      <input
+                        type="text"
+                        required
+                        value={regUpazila}
+                        onChange={(e) => setRegUpazila(e.target.value)}
+                        placeholder="e.g. Dhanmondi, Maijdee"
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-800"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">House / Road / Flat / Street *</label>
+                      <div className="relative">
+                        <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="text"
+                          required
+                          value={regStreet}
+                          onChange={(e) => setRegStreet(e.target.value)}
+                          placeholder="e.g. House 42, Road 11"
+                          className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-800"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full py-3.5 bg-gradient-to-r from-brand-500 to-amber-500 hover:from-brand-600 hover:to-amber-600 disabled:opacity-50 text-white font-bold text-sm rounded-xl shadow-lg shadow-brand-500/25 flex items-center justify-center gap-2 transition-all mt-2"
+                >
+                  {isLoading ? 'Creating Account...' : 'Complete Registration'}
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </form>
+            )
           )}
 
         </div>

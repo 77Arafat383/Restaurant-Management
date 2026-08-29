@@ -126,6 +126,17 @@ class PersistentStore {
     return null;
   }
 
+  updateUserApproval(id: string, isApproved: boolean): User | null {
+    this.loadFromDisk();
+    const u = this.data.users.find(user => user.id === id);
+    if (u) {
+      u.isApproved = isApproved;
+      this.saveToDisk();
+      return u;
+    }
+    return null;
+  }
+
   // --- Restaurants Operations ---
   getRestaurants(): Restaurant[] {
     this.loadFromDisk();

@@ -27,6 +27,8 @@ export async function POST(req: Request) {
       ? (role as UserRole)
       : 'CUSTOMER';
 
+    const isPartner = ['RESTAURANT_MANAGER', 'DELIVERY_PERSON', 'ADMIN'].includes(assignedRole);
+
     const newUser: User = {
       id: `user_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
       name: name.trim(),
@@ -35,6 +37,7 @@ export async function POST(req: Request) {
       phone: phone?.trim() || '+880 1700-000000',
       address: address?.trim() || 'Dhaka, Bangladesh',
       role: assignedRole,
+      isApproved: isPartner ? false : true,
       avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name.trim())}`,
     };
 
@@ -46,8 +49,11 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         success: true,
-        message: 'Account registered successfully!',
-        data: safeUser,
+        message: isPartner 
+          ? 'Your registration request has been submitted and is pending administrator approval.' 
+          : 'Account registered successfully!',
+        data: isPartner ? null : safeUser,
+        pendingApproval: isPartner,
       },
       { status: 201 }
     );

@@ -24,6 +24,7 @@ export interface User {
   address?: string;
   avatar?: string;
   restaurantId?: string; // If manager
+  isApproved?: boolean;
 }
 
 export interface FoodItem {

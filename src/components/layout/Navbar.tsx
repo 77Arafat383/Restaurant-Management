@@ -54,11 +54,11 @@ export default function Navbar() {
               Restaurants
             </Link>
 
-            <Link href="/about" className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-brand-50 hover:text-brand-600 text-slate-700 transition-all">
+            <Link href="/about#about" className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-brand-50 hover:text-brand-600 text-slate-700 transition-all">
               About Us
             </Link>
 
-            <Link href="/contact" className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-brand-50 hover:text-brand-600 text-slate-700 transition-all">
+            <Link href="/about#contact" className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-brand-50 hover:text-brand-600 text-slate-700 transition-all">
               Contact
             </Link>
 

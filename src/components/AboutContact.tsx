@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Mail, Phone, MapPin, Send, ShieldCheck, GraduationCap, Users, Clock, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Mail, Phone, MapPin, Send, ShieldCheck, GraduationCap, Users, Clock, Sparkles, Star } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { INITIAL_FEEDBACKS } from '@/lib/seed-data';
 
 export default function AboutContact() {
   const { currentUser } = useAuth();
@@ -13,6 +14,34 @@ export default function AboutContact() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const hash = window.location.hash;
+      const path = window.location.pathname;
+      
+      if (hash) {
+        const element = document.querySelector(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      } else if (path.includes('/contact')) {
+        const element = document.querySelector('#contact');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    };
+
+    // Delay slightly to ensure component has mounted and rendered fully
+    const timer = setTimeout(handleScroll, 150);
+
+    window.addEventListener('hashchange', handleScroll);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('hashchange', handleScroll);
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,96 +92,143 @@ export default function AboutContact() {
           About Us & <span className="bg-gradient-to-r from-brand-600 to-amber-500 bg-clip-text text-transparent">Contact Support</span>
         </h1>
         <p className="text-slate-500 text-sm sm:text-base leading-relaxed font-semibold font-inter">
-          Explore our university Software Engineering project details and get in touch with our support desk.
+          Explore our university Software Engineering project details, verified customer reviews, and get in touch with support.
         </p>
       </div>
 
-      {/* Grid Layout: Academic Project Details & Contact Card */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
-        {/* Left Column: About Us & Academic Supervision (5 cols) */}
-        <div className="lg:col-span-5 space-y-6">
-          <div className="bg-gradient-to-tr from-slate-950 to-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl relative overflow-hidden border border-slate-800">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-brand-500/10 rounded-full blur-2xl" />
-            <div className="space-y-6 relative z-10">
-              
-              {/* Supervisor */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2.5">
-                  <GraduationCap className="w-7 h-7 text-brand-400" />
-                  <h2 className="text-lg font-black font-outfit">Academic Supervisor</h2>
-                </div>
-                <p className="text-xs text-slate-400 font-medium leading-relaxed font-inter">
-                  This system was conceptualized, designed, and developed under the academic guidance of:
-                </p>
-                <div className="bg-slate-800/40 p-4 rounded-2xl border border-slate-700/50">
-                  <p className="text-sm font-bold text-white font-outfit">Dr. Nazia Majadi</p>
-                  <p className="text-[10px] text-slate-400">Professor, Dept. of CSTE</p>
-                  <p className="text-[10px] text-slate-500 font-semibold mt-0.5">Noakhali Science & Technology University</p>
-                </div>
-              </div>
-
-              <hr className="border-slate-800" />
-
-              {/* Creators */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2.5">
-                  <Users className="w-7 h-7 text-amber-400" />
-                  <h2 className="text-lg font-black font-outfit">Project Creators</h2>
-                </div>
-                <p className="text-xs text-slate-400 font-medium leading-relaxed font-inter">
-                  Designed & implemented by Department of CSTE students:
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="bg-slate-800/40 p-3.5 rounded-xl border border-slate-700/50 text-left">
-                    <p className="text-xs font-bold text-white">Maknoon Sultana</p>
-                    <p className="text-[9px] text-slate-400 mt-0.5">ID: NFH2201007F</p>
-                  </div>
-                  <div className="bg-slate-800/40 p-3.5 rounded-xl border border-slate-700/50 text-left">
-                    <p className="text-xs font-bold text-white">Umme Nur Sadia</p>
-                    <p className="text-[9px] text-slate-400 mt-0.5">ID: BKH2201020F</p>
-                  </div>
-                </div>
-              </div>
-
+      {/* SECTION 1: About Section (Academic Supervision & Project Creators) */}
+      <div id="about" className="bg-gradient-to-tr from-slate-950 to-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl relative overflow-hidden border border-slate-800 scroll-mt-20">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-brand-500/10 rounded-full blur-2xl" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start relative z-10">
+          
+          {/* Left Column: Supervisor */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2.5">
+              <GraduationCap className="w-7 h-7 text-brand-400" />
+              <h2 className="text-lg font-black font-outfit">Academic Supervisor</h2>
+            </div>
+            <p className="text-xs text-slate-400 font-medium leading-relaxed font-inter">
+              This system was conceptualized, designed, and developed under the academic guidance of:
+            </p>
+            <div className="bg-slate-800/40 p-5 rounded-2xl border border-slate-700/50">
+              <p className="text-base font-bold text-white font-outfit">Dr. Nazia Majadi</p>
+              <p className="text-xs text-slate-400 mt-0.5">Professor, Dept. of CSTE</p>
+              <p className="text-xs text-slate-500 font-semibold mt-1">Noakhali Science & Technology University</p>
             </div>
           </div>
 
-          {/* Quick Contact info */}
+          {/* Right Column: Creators */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2.5">
+              <Users className="w-7 h-7 text-amber-400" />
+              <h2 className="text-lg font-black font-outfit">Project Creators</h2>
+            </div>
+            <p className="text-xs text-slate-400 font-medium leading-relaxed font-inter">
+              Designed & implemented by Department of CSTE students:
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="bg-slate-800/40 p-4 rounded-xl border border-slate-700/50 text-left">
+                <p className="text-xs font-bold text-white">Maknoon Sultana</p>
+                <p className="text-[10px] text-slate-400 mt-1">ID: NFH2201007F</p>
+              </div>
+              <div className="bg-slate-800/40 p-4 rounded-xl border border-slate-700/50 text-left">
+                <p className="text-xs font-bold text-white">Umme Nur Sadia</p>
+                <p className="text-[10px] text-slate-400 mt-1">ID: BKH2201020F</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* SECTION 2: Customer Testimonials Section */}
+      <section className="bg-slate-50 py-12 px-6 sm:px-8 rounded-3xl border border-slate-200/60 shadow-sm space-y-8">
+        <div className="text-center max-w-xl mx-auto space-y-2">
+          <h2 className="text-2xl font-black text-slate-900 font-outfit">What Foodies Love About QuickBite</h2>
+          <p className="text-xs text-slate-500 font-semibold font-inter">
+            Verified reviews from happy customers across Dhaka.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {INITIAL_FEEDBACKS.map(fb => (
+            <div key={fb.id} className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/60 shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-100 shrink-0">
+                    {fb.customerAvatar && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={fb.customerAvatar} alt={fb.customerName} className="w-full h-full object-cover" />
+                    )}
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black text-slate-900">{fb.customerName}</h4>
+                    <p className="text-[10px] text-brand-600 font-bold">Reviewed {fb.restaurantName}</p>
+                  </div>
+                </div>
+                <div className="flex text-amber-500">
+                  {[...Array(fb.rating)].map((_, i) => (
+                    <Star key={i} className="w-3.5 h-3.5 fill-amber-500" />
+                  ))}
+                </div>
+              </div>
+              <p className="text-xs text-slate-600 italic leading-relaxed">
+                &ldquo;{fb.comment}&rdquo;
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* SECTION 3: Contact Section (Form & Hotline Details) */}
+      <div id="contact" className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start scroll-mt-20">
+        
+        {/* Left Column: Central Contact Info Details (5 cols) */}
+        <div className="lg:col-span-5 space-y-6">
           <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
-            <h3 className="font-black text-slate-900 text-sm font-outfit">Contact Support Details</h3>
+            <h3 className="font-black text-slate-900 text-sm font-outfit">Central Contact Details</h3>
             
-            <div className="space-y-3 text-xs font-semibold text-slate-600 font-inter">
+            <div className="space-y-3.5 text-xs font-semibold text-slate-600 font-inter">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-slate-50 text-blue-500 flex items-center justify-center shrink-0">
-                  <Phone className="w-4 h-4" />
+                <div className="w-8.5 h-8.5 rounded-lg bg-slate-50 text-blue-500 flex items-center justify-center shrink-0">
+                  <Phone className="w-4 h-4 text-brand-500" />
                 </div>
                 <div>
                   <p className="text-[9px] text-slate-400 uppercase font-bold">Hotline</p>
-                  <p className="text-slate-800">+880 1711-223344</p>
+                  <p className="text-slate-800 font-bold">+880 1711-223344</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-slate-50 text-blue-500 flex items-center justify-center shrink-0">
-                  <Mail className="w-4 h-4" />
+                <div className="w-8.5 h-8.5 rounded-lg bg-slate-50 text-blue-500 flex items-center justify-center shrink-0">
+                  <Mail className="w-4 h-4 text-brand-500" />
                 </div>
                 <div>
                   <p className="text-[9px] text-slate-400 uppercase font-bold">Email Support</p>
-                  <p className="text-slate-800">support@quickbite.com</p>
+                  <p className="text-slate-800 font-bold">support@quickbite.com</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-slate-50 text-blue-500 flex items-center justify-center shrink-0">
-                  <MapPin className="w-4 h-4" />
+                <div className="w-8.5 h-8.5 rounded-lg bg-slate-50 text-blue-500 flex items-center justify-center shrink-0">
+                  <MapPin className="w-4 h-4 text-brand-500" />
                 </div>
                 <div>
                   <p className="text-[9px] text-slate-400 uppercase font-bold">Address</p>
-                  <p className="text-slate-800">CSTE Dept, NSTU, Noakhali</p>
+                  <p className="text-slate-800 font-bold">CSTE Dept, NSTU, Noakhali</p>
                 </div>
               </div>
             </div>
+          </div>
+
+          <div className="bg-slate-950 text-white p-6 rounded-3xl space-y-4 border border-slate-800 shadow-xl relative overflow-hidden">
+            <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-brand-500/10 rounded-full blur-2xl" />
+            <h3 className="font-black text-white font-outfit flex items-center gap-2">
+              <Clock className="w-5 h-5 text-emerald-400 animate-pulse" /> Delivery Hours
+            </h3>
+            <p className="text-xs text-slate-400 font-semibold font-inter leading-relaxed">
+              Our automated kitchen dispatch routing and live rider tracking operate continuously from **8:00 AM to 11:30 PM** every day.
+            </p>
           </div>
         </div>
 

@@ -6,17 +6,17 @@ import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
 import { INITIAL_RESTAURANTS, INITIAL_FOOD_ITEMS, INITIAL_FEEDBACKS } from '@/lib/seed-data';
 import { formatPrice } from '@/lib/utils';
-import { 
-  Search, 
-  Star, 
-  Clock, 
-  Bike, 
-  Flame, 
-  Sparkles, 
-  Plus, 
-  ArrowRight, 
-  CheckCircle2, 
-  Leaf, 
+import {
+  Search,
+  Star,
+  Clock,
+  Bike,
+  Flame,
+  Sparkles,
+  Plus,
+  ArrowRight,
+  CheckCircle2,
+  Leaf,
   ShieldCheck,
   TrendingUp,
   Award
@@ -49,7 +49,7 @@ export default function HomePage() {
           setRestaurants(data.data);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
 
     fetch('/api/foods')
       .then(res => res.json())
@@ -58,20 +58,20 @@ export default function HomePage() {
           setFoods(data.data);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   // Filter Restaurants
   const filteredRestaurants = restaurants.filter(r => {
     const matchQuery = r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                       r.cuisine.toLowerCase().includes(searchTerm.toLowerCase());
+      r.cuisine.toLowerCase().includes(searchTerm.toLowerCase());
     return matchQuery;
   });
 
   // Filter Food Items
   const filteredFoods = foods.filter(f => {
     const matchSearch = f.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        f.description.toLowerCase().includes(searchTerm.toLowerCase());
+      f.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchVeg = vegOnly ? f.isVeg : true;
     let matchCat = true;
     if (selectedCategory === 'biryani') matchCat = f.category.toLowerCase().includes('biryani') || f.restaurantId === 'rest_1';
@@ -94,7 +94,7 @@ export default function HomePage() {
 
   return (
     <div className="space-y-16 pb-20">
-      
+
       {/* Toast Notice */}
       {addedItemNotice && (
         <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-700 animate-slide-up">
@@ -114,7 +114,7 @@ export default function HomePage() {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            
+
             {/* Left Content */}
             <div className="lg:col-span-7 space-y-6">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-100/80 border border-orange-200 text-brand-700 text-xs font-bold shadow-sm">
@@ -221,11 +221,10 @@ export default function HomePage() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setVegOnly(!vegOnly)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
-                vegOnly
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${vegOnly
                   ? 'bg-emerald-50 border-emerald-500 text-emerald-700 shadow-sm'
                   : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
-              }`}
+                }`}
             >
               <Leaf className={`w-3.5 h-3.5 ${vegOnly ? 'text-emerald-600' : 'text-slate-400'}`} />
               <span>Pure Veg Only</span>
@@ -239,11 +238,10 @@ export default function HomePage() {
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`flex items-center gap-2.5 px-5 py-3 rounded-2xl text-sm font-bold whitespace-nowrap transition-all ${
-                selectedCategory === cat.id
+              className={`flex items-center gap-2.5 px-5 py-3 rounded-2xl text-sm font-bold whitespace-nowrap transition-all ${selectedCategory === cat.id
                   ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/25 scale-[1.02]'
                   : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
-              }`}
+                }`}
             >
               <span className="text-base">{cat.icon}</span>
               <span>{cat.name}</span>
@@ -401,46 +399,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Customer Testimonials Section */}
-      <section className="bg-slate-100/70 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-xl mx-auto mb-12">
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900">What Foodies Love About QuickBite</h2>
-            <p className="text-xs sm:text-sm text-slate-600 mt-2">
-              Verified reviews from happy customers across Dhaka.
-            </p>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {INITIAL_FEEDBACKS.map(fb => (
-              <div key={fb.id} className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-100">
-                      {fb.customerAvatar && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={fb.customerAvatar} alt={fb.customerName} className="w-full h-full object-cover" />
-                      )}
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-slate-900">{fb.customerName}</h4>
-                      <p className="text-xs text-brand-600 font-medium">Reviewed {fb.restaurantName}</p>
-                    </div>
-                  </div>
-                  <div className="flex text-amber-500">
-                    {[...Array(fb.rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-amber-500" />
-                    ))}
-                  </div>
-                </div>
-                <p className="text-sm text-slate-700 italic leading-relaxed">
-                  &ldquo;{fb.comment}&rdquo;
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
     </div>
   );

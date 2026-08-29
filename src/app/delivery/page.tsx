@@ -63,6 +63,18 @@ export default function DeliveryPartnerPortal() {
     }
   };
 
+  if (!currentUser || (currentUser.role !== 'DELIVERY_PERSON' && currentUser.role !== 'ADMIN')) {
+    return (
+      <div className="max-w-md mx-auto my-16 p-8 bg-white rounded-3xl border border-slate-200 text-center space-y-4 shadow-sm">
+        <Bike className="w-16 h-16 text-blue-500 mx-auto animate-bounce" />
+        <h2 className="text-xl font-black text-slate-900">Rider Portal Access Restricted</h2>
+        <p className="text-xs text-slate-500 font-medium leading-relaxed">
+          Please sign in with a registered Rider account to access the delivery dispatch console and manage orders.
+        </p>
+      </div>
+    );
+  }
+
   const assignedDeliveries = orders.filter(
     o => o.deliveryPersonId === currentUser.id || ['PREPARING', 'READY_FOR_PICKUP', 'OUT_FOR_DELIVERY'].includes(o.status)
   );

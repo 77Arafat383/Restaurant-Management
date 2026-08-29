@@ -69,6 +69,18 @@ export default function RestaurantManagerPortal() {
     loadData();
   }, [restaurantId]);
 
+  if (!currentUser || (currentUser.role !== 'RESTAURANT_MANAGER' && currentUser.role !== 'ADMIN')) {
+    return (
+      <div className="max-w-md mx-auto my-16 p-8 bg-white rounded-3xl border border-slate-200 text-center space-y-4 shadow-sm">
+        <Store className="w-16 h-16 text-amber-500 mx-auto animate-bounce" />
+        <h2 className="text-xl font-black text-slate-900 font-outfit">Kitchen Portal Access Restricted</h2>
+        <p className="text-xs text-slate-500 font-medium leading-relaxed">
+          Please sign in with a registered Restaurant Partner account to access the kitchen management portal.
+        </p>
+      </div>
+    );
+  }
+
   // Update order status action
   const handleUpdateOrderStatus = async (orderId: string, newStatus: OrderStatus) => {
     try {

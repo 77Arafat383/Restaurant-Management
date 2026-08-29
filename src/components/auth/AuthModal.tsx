@@ -3,35 +3,68 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { UserRole } from '@/lib/types';
-import { 
-  X, 
-  Lock, 
-  Mail, 
-  User as UserIcon, 
-  Phone, 
-  MapPin, 
-  Eye, 
-  EyeOff, 
-  ArrowRight, 
-  CheckCircle2, 
-  AlertCircle, 
-  UtensilsCrossed, 
+import {
+  X,
+  Lock,
+  Mail,
+  User as UserIcon,
+  Phone,
+  MapPin,
+  Eye,
+  EyeOff,
+  ArrowRight,
+  CheckCircle2,
+  AlertCircle,
+  UtensilsCrossed,
   Sparkles,
   Store,
   Bike,
   ShieldCheck
 } from 'lucide-react';
 
+const DISTRICTS_BY_DIVISION: Record<string, string[]> = {
+  Dhaka: [
+    'Dhaka', 'Faridpur', 'Gazipur', 'Gopalganj', 'Kishoreganj',
+    'Madaripur', 'Manikganj', 'Munshiganj', 'Narayanganj',
+    'Narsingdi', 'Rajbari', 'Shariatpur', 'Tangail'
+  ],
+  Chattogram: [
+    'Chattogram', 'Bandarban', 'Brahmanbaria', 'Chandpur', 'Cox\'s Bazar',
+    'Feni', 'Khagrachhari', 'Lakshmipur', 'Noakhali', 'Rangamati', 'Cumilla'
+  ],
+  Rajshahi: [
+    'Rajshahi', 'Bogura', 'Joypurhat', 'Naogaon', 'Natore',
+    'Chapainawabganj', 'Pabna', 'Sirajganj'
+  ],
+  Khulna: [
+    'Khulna', 'Bagerhat', 'Chuadanga', 'Jessore', 'Jhenaidah',
+    'Kushtia', 'Magura', 'Meherpur', 'Narail', 'Satkhira'
+  ],
+  Barishal: [
+    'Barishal', 'Barguna', 'Bhola', 'Jhalokati', 'Patuakhali', 'Pirojpur'
+  ],
+  Sylhet: [
+    'Sylhet', 'Habiganj', 'Moulvibazar', 'Sunamganj'
+  ],
+  Rangpur: [
+    'Rangpur', 'Dinajpur', 'Gaibandha', 'Kurigram', 'Lalmonirhat',
+    'Nilphamari', 'Panchagarh', 'Thakurgaon'
+  ],
+  Mymensingh: [
+    'Mymensingh', 'Jamalpur', 'Netrokona', 'Sherpur'
+  ]
+};
+
 export default function AuthModal() {
-  const { 
-    isAuthModalOpen, 
-    closeAuthModal, 
-    authModalTab, 
-    authPromptMessage, 
-    login, 
-    register, 
+  const {
+    isAuthModalOpen,
+    closeAuthModal,
+    authModalTab,
+    authPromptMessage,
+    login,
+    register,
     switchRole,
-    availableUsers 
+    availableUsers
   } = useAuth();
 
   const [activeTab, setActiveTab] = useState<'login' | 'register'>(authModalTab);
@@ -49,7 +82,10 @@ export default function AuthModal() {
   const [regEmail, setRegEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
   const [regPhone, setRegPhone] = useState('');
-  const [regAddress, setRegAddress] = useState('');
+  const [regDivision, setRegDivision] = useState('Dhaka');
+  const [regDistrict, setRegDistrict] = useState('');
+  const [regUpazila, setRegUpazila] = useState('');
+  const [regStreet, setRegStreet] = useState('');
   const [regRole, setRegRole] = useState<UserRole>('CUSTOMER');
 
   // Synchronize internal tab when context opens with a specific tab
@@ -58,6 +94,14 @@ export default function AuthModal() {
     setErrorMessage(null);
     setSuccessMessage(null);
   }, [authModalTab, isAuthModalOpen]);
+
+  // Update district automatically when division changes
+  React.useEffect(() => {
+    const districts = DISTRICTS_BY_DIVISION[regDivision] || [];
+    if (districts.length > 0) {
+      setRegDistrict(districts[0]);
+    }
+  }, [regDivision]);
 
   if (!isAuthModalOpen) return null;
 
@@ -87,6 +131,12 @@ export default function AuthModal() {
       setErrorMessage('Password must be at least 4 characters long.');
       return;
     }
+    if (!regDistrict.trim() || !regUpazila.trim() || !regStreet.trim()) {
+      setErrorMessage('Please fill in all address details (District, Town/Area, and House/Street).');
+      return;
+    }
+
+    const fullAddress = `${regStreet.trim()}, ${regUpazila.trim()}, ${regDistrict.trim()}, ${regDivision}`;
 
     setIsLoading(true);
     setErrorMessage(null);
@@ -96,7 +146,7 @@ export default function AuthModal() {
       email: regEmail.trim(),
       password: regPassword,
       phone: regPhone.trim() || '+880 1711-000000',
-      address: regAddress.trim() || 'Dhaka, Bangladesh',
+      address: fullAddress,
       role: regRole,
     });
 
@@ -127,10 +177,10 @@ export default function AuthModal() {
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm animate-fade-in">
-      
+
       {/* Modal Box */}
       <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
-        
+
         {/* Decorative Top Accent */}
         <div className="h-2 bg-gradient-to-r from-brand-500 via-amber-500 to-orange-600" />
 
@@ -143,7 +193,7 @@ export default function AuthModal() {
         </button>
 
         <div className="p-6 sm:p-8">
-          
+
           {/* Header */}
           <div className="flex items-center gap-3 mb-5">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-600 to-amber-500 flex items-center justify-center text-white shadow-md shadow-brand-500/25">
@@ -152,14 +202,12 @@ export default function AuthModal() {
             <div>
               <h2 className="text-2xl font-black text-slate-900 flex items-center gap-1.5">
                 Quick<span className="text-brand-500">Bite</span>
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-100">
-                  Account Portal
-                </span>
+
               </h2>
               <p className="text-xs text-slate-500 font-medium">
-                {activeTab === 'login' 
+                {activeTab === 'login'
                   ? 'Sign in to place orders, track live food deliveries, and save favorite spots.'
-                  : 'Join QuickBite to start ordering delicious food delivered fast.'}
+                  : 'Join QuickBite to start ordering delicious food.'}
               </p>
             </div>
           </div>
@@ -192,24 +240,22 @@ export default function AuthModal() {
             <button
               type="button"
               onClick={() => { setActiveTab('login'); setErrorMessage(null); }}
-              className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
-                activeTab === 'login'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-800'
-              }`}
+              className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${activeTab === 'login'
+                ? 'bg-white text-slate-900 shadow-sm'
+                : 'text-slate-500 hover:text-slate-800'
+                }`}
             >
               Sign In
             </button>
             <button
               type="button"
               onClick={() => { setActiveTab('register'); setErrorMessage(null); }}
-              className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
-                activeTab === 'register'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-800'
-              }`}
+              className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${activeTab === 'register'
+                ? 'bg-white text-slate-900 shadow-sm'
+                : 'text-slate-500 hover:text-slate-800'
+                }`}
             >
-              Create Account (Register)
+              Create Account
             </button>
           </div>
 
@@ -264,54 +310,6 @@ export default function AuthModal() {
                 {isLoading ? 'Signing In...' : 'Sign In to QuickBite'}
                 <ArrowRight className="w-4 h-4" />
               </button>
-
-              {/* 1-Click Fast Demo Login Buttons */}
-              <div className="pt-4 border-t border-slate-100">
-                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 text-center">
-                  Quick 1-Click Persona Test Login
-                </p>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleQuickDemoLogin('CUSTOMER')}
-                    className="p-2 rounded-xl border border-emerald-200 bg-emerald-50/60 hover:bg-emerald-100 text-emerald-800 text-left transition-colors"
-                  >
-                    <UserIcon className="w-3.5 h-3.5 mb-1 text-emerald-600" />
-                    <p className="text-[10px] font-black leading-tight">Customer</p>
-                    <p className="text-[9px] text-emerald-600/80">Maknoon</p>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleQuickDemoLogin('RESTAURANT_MANAGER')}
-                    className="p-2 rounded-xl border border-amber-200 bg-amber-50/60 hover:bg-amber-100 text-amber-800 text-left transition-colors"
-                  >
-                    <Store className="w-3.5 h-3.5 mb-1 text-amber-600" />
-                    <p className="text-[10px] font-black leading-tight">Kitchen</p>
-                    <p className="text-[9px] text-amber-600/80">Chef Kabir</p>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleQuickDemoLogin('DELIVERY_PERSON')}
-                    className="p-2 rounded-xl border border-blue-200 bg-blue-50/60 hover:bg-blue-100 text-blue-800 text-left transition-colors"
-                  >
-                    <Bike className="w-3.5 h-3.5 mb-1 text-blue-600" />
-                    <p className="text-[10px] font-black leading-tight">Rider</p>
-                    <p className="text-[9px] text-blue-600/80">Rakibul</p>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleQuickDemoLogin('ADMIN')}
-                    className="p-2 rounded-xl border border-purple-200 bg-purple-50/60 hover:bg-purple-100 text-purple-800 text-left transition-colors"
-                  >
-                    <ShieldCheck className="w-3.5 h-3.5 mb-1 text-purple-600" />
-                    <p className="text-[10px] font-black leading-tight">Admin</p>
-                    <p className="text-[9px] text-purple-600/80">Dr. Nazia</p>
-                  </button>
-                </div>
-              </div>
             </form>
           )}
 
@@ -386,48 +384,75 @@ export default function AuthModal() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Delivery Street Address</label>
-                <div className="relative">
-                  <MapPin className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    value={regAddress}
-                    onChange={(e) => setRegAddress(e.target.value)}
-                    placeholder="e.g. Flat 3A, House 15, Dhanmondi, Dhaka"
-                    className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-800"
-                  />
+              <div className="space-y-3">
+                <label className="block text-xs font-bold text-slate-700 mb-1">Delivery Address (Bangladesh)</label>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 mb-1">Division *</label>
+                    <select
+                      value={regDivision}
+                      onChange={(e) => setRegDivision(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-800 bg-white"
+                    >
+                      <option value="Dhaka">Dhaka</option>
+                      <option value="Chattogram">Chattogram</option>
+                      <option value="Rajshahi">Rajshahi</option>
+                      <option value="Khulna">Khulna</option>
+                      <option value="Barishal">Barishal</option>
+                      <option value="Sylhet">Sylhet</option>
+                      <option value="Rangpur">Rangpur</option>
+                      <option value="Mymensingh">Mymensingh</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 mb-1">District *</label>
+                    <select
+                      value={regDistrict}
+                      onChange={(e) => setRegDistrict(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-800 bg-white"
+                    >
+                      {(DISTRICTS_BY_DIVISION[regDivision] || []).map((dist) => (
+                        <option key={dist} value={dist}>
+                          {dist}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 mb-1">Town / Area / Upazila *</label>
+                    <input
+                      type="text"
+                      required
+                      value={regUpazila}
+                      onChange={(e) => setRegUpazila(e.target.value)}
+                      placeholder="e.g. Dhanmondi, Maijdee"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-800"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 mb-1">House / Road / Flat / Street *</label>
+                    <div className="relative">
+                      <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        required
+                        value={regStreet}
+                        onChange={(e) => setRegStreet(e.target.value)}
+                        placeholder="e.g. House 42, Road 11"
+                        className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-800"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Register As</label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setRegRole('CUSTOMER')}
-                    className={`py-2 px-3 rounded-xl border text-xs font-bold text-left transition-all ${
-                      regRole === 'CUSTOMER'
-                        ? 'border-brand-500 bg-brand-50 text-brand-700 shadow-sm'
-                        : 'border-slate-200 text-slate-600 hover:border-slate-300'
-                    }`}
-                  >
-                    🍴 Food Customer
-                  </button>
 
-                  <button
-                    type="button"
-                    onClick={() => setRegRole('RESTAURANT_MANAGER')}
-                    className={`py-2 px-3 rounded-xl border text-xs font-bold text-left transition-all ${
-                      regRole === 'RESTAURANT_MANAGER'
-                        ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm'
-                        : 'border-slate-200 text-slate-600 hover:border-slate-300'
-                    }`}
-                  >
-                    🏪 Restaurant Partner
-                  </button>
-                </div>
-              </div>
 
               <button
                 type="submit"

@@ -1,0 +1,194 @@
+// Prisma Schema for QuickBite Online Food Ordering System
+// Persistent SQLite Database
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id               String       @id @default(cuid())
+  name             String
+  email            String       @unique
+  password         String
+  phone            String?
+  address          String?
+  role             String       @default("CUSTOMER") // CUSTOMER, RESTAURANT_MANAGER, DELIVERY_PERSON, ADMIN
+  avatar           String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  // Relations
+  restaurants      Restaurant[] @relation("RestaurantOwner")
+  customerOrders   Order[]      @relation("CustomerOrders")
+  deliveryOrders   Order[]      @relation("DeliveryPersonOrders")
+  feedbacks        Feedback[]
+  assignedDeliveries Delivery[] @relation("DeliveryPersonDeliveries")
+
+  @@map("users")
+}
+
+model Restaurant {
+  id              String      @id @default(cuid())
+  name            String
+  description     String?
+  email           String      @unique
+  phone           String
+  address         String
+  cuisine         String      @default("Various")
+  rating          Float       @default(4.5)
+  ratingCount     Int         @default(0)
+  deliveryTime    String      @default("25-35 min")
+  deliveryFee     Float       @default(40.0)
+  minOrder        Float       @default(150.0)
+  bannerImage     String?
+  logoImage       String?
+  isApproved      Boolean     @default(true)
+  isOpen          Boolean     @default(true)
+  ownerId         String
+  owner           User        @relation("RestaurantOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Relations
+  foodItems       FoodItem[]
+  orders          Order[]
+  feedbacks       Feedback[]
+
+  @@map("restaurants")
+}
+
+model FoodItem {
+  id              String      @id @default(cuid())
+  name            String
+  description     String?
+  price           Float
+  category        String      @default("Main Course")
+  isAvailable     Boolean     @default(true)
+  image           String?
+  isVeg           Boolean     @default(false)
+  isSpicy         Boolean     @default(false)
+  rating          Float       @default(5.0)
+  preparationTime String      @default("15-20 min")
+  restaurantId    String
+  restaurant      Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Relations
+  orderItems      OrderItem[]
+
+  @@map("food_items")
+}
+
+model Order {
+  id                  String         @id @default(cuid())
+  orderNumber         String         @unique
+  customerId          String
+  customer            User           @relation("CustomerOrders", fields: [customerId], references: [id])
+  customerName        String?
+  customerEmail       String?
+  customerPhone       String?
+  restaurantId        String
+  restaurant          Restaurant     @relation(fields: [restaurantId], references: [id])
+  restaurantName      String?
+  restaurantAddress   String?
+  deliveryPersonId    String?
+  deliveryPerson      User?          @relation("DeliveryPersonOrders", fields: [deliveryPersonId], references: [id])
+  deliveryPersonName  String?
+  deliveryPersonPhone String?
+  
+  subtotal            Float
+  deliveryFee         Float          @default(40.0)
+  tax                 Float          @default(0.0)
+  discount            Float          @default(0.0)
+  totalAmount         Float
+  
+  status              String         @default("PENDING") // PENDING, ACCEPTED, PREPARING, READY_FOR_PICKUP, OUT_FOR_DELIVERY, DELIVERED, REJECTED, CANCELLED
+  paymentMethod       String         @default("COD") // CARD, BKASH, NAGAD, COD
+  paymentStatus       String         @default("PENDING") // PENDING, COMPLETED, FAILED, REFUNDED
+  transactionId       String?
+  deliveryAddress     String
+  contactPhone        String?
+  notes               String?
+  estimatedDeliveryTime String?      @default("35-45 mins")
+  
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  // Relations
+  items               OrderItem[]
+  payment             Payment?
+  delivery            Delivery?
+  feedback            Feedback?
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String    @id @default(cuid())
+  orderId     String
+  order       Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  foodItemId  String?
+  foodItem    FoodItem? @relation(fields: [foodItemId], references: [id], onDelete: SetNull)
+  name        String
+  price       Float
+  quantity    Int       @default(1)
+  subtotal    Float
+  notes       String?
+
+  @@map("order_items")
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  orderId         String        @unique
+  order           Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount          Float
+  paymentMethod   String        @default("COD")
+  paymentStatus   String        @default("PENDING")
+  transactionId   String?       @unique
+  paidAt          DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("payments")
+}
+
+model Delivery {
+  id                String          @id @default(cuid())
+  orderId           String          @unique
+  order             Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  deliveryPersonId  String?
+  deliveryPerson    User?           @relation("DeliveryPersonDeliveries", fields: [deliveryPersonId], references: [id])
+  status            String          @default("ASSIGNED")
+  pickupTime        DateTime?
+  deliveredTime     DateTime?
+  notes             String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@map("deliveries")
+}
+
+model Feedback {
+  id              String      @id @default(cuid())
+  orderId         String      @unique
+  order           Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  customerId      String
+  customer        User        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customerName    String?
+  customerAvatar  String?
+  restaurantId    String
+  restaurant      Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  restaurantName  String?
+  rating          Int         @default(5)
+  comment         String?
+  createdAt       DateTime    @default(now())
+
+  @@map("feedbacks")
+}

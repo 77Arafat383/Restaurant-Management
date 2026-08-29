@@ -21,6 +21,13 @@ const nextConfig = {
       bodySizeLimit: '4mb',
     },
   },
+  webpack: (config, { dev }) => {
+    if (dev) {
+      // Disable webpack disk caching in dev mode to prevent cache collisions & locking errors on Windows
+      config.cache = false;
+    }
+    return config;
+  },
 };
 
 export default nextConfig;

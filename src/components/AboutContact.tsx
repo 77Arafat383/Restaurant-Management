@@ -19,7 +19,7 @@ export default function AboutContact() {
     const handleScroll = () => {
       const hash = window.location.hash;
       const path = window.location.pathname;
-      
+
       if (hash) {
         const element = document.querySelector(hash);
         if (element) {
@@ -53,7 +53,7 @@ export default function AboutContact() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const res = await fetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -88,57 +88,82 @@ export default function AboutContact() {
         <span className="px-3.5 py-1 rounded-full bg-brand-50 text-brand-700 text-xs font-black tracking-wider uppercase border border-brand-100 animate-pulse">
           Info & Support Hub
         </span>
-        <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-slate-900 font-outfit">
-          About Us & <span className="bg-gradient-to-r from-brand-600 to-amber-500 bg-clip-text text-transparent">Contact Support</span>
+        <h1 className="text-4xl sm:text-5xl font-black tracking-tight font-outfit">
+          <span className="bg-gradient-to-r from-brand-600 to-amber-500 bg-clip-text text-transparent">About Us</span>
         </h1>
         <p className="text-slate-500 text-sm sm:text-base leading-relaxed font-semibold font-inter">
-          Explore our university Software Engineering project details, verified customer reviews, and get in touch with support.
+          Explore our food delivery platform features, verified customer reviews, and get in touch with support.
         </p>
       </div>
 
-      {/* SECTION 1: About Section (Academic Supervision & Project Creators) */}
-      <div id="about" className="bg-gradient-to-tr from-slate-950 to-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl relative overflow-hidden border border-slate-800 scroll-mt-20">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-brand-500/10 rounded-full blur-2xl" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start relative z-10">
+      {/* SECTION 1: About Section (Platform Story & Core Services) */}
+      <div id="about" className="space-y-12 scroll-mt-20">
+        
+        {/* Row 1: Story & Mission */}
+        <div className="text-center space-y-4 max-w-3xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl font-black font-outfit text-slate-900">Our Story & Mission</h2>
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium font-inter max-w-2xl mx-auto">
+            QuickBite is Dhaka's premier online food ordering and delivery service. We connect food enthusiasts with top-rated local kitchens, providing a seamless ordering experience powered by hyper-local routing and real-time delivery agents.
+          </p>
           
-          {/* Left Column: Supervisor */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2.5">
-              <GraduationCap className="w-7 h-7 text-brand-400" />
-              <h2 className="text-lg font-black font-outfit">Academic Supervisor</h2>
+          <div className="grid grid-cols-2 gap-4 max-w-md mx-auto pt-2">
+            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/60 shadow-sm text-center">
+              <p className="text-2xl font-black text-amber-500 font-outfit">4.9 ★</p>
+              <p className="text-[10px] text-slate-500 font-bold uppercase mt-1">Average Rating</p>
+              <p className="text-[9px] text-slate-400 font-semibold mt-0.5">By 10K+ Happy Foodies</p>
             </div>
-            <p className="text-xs text-slate-400 font-medium leading-relaxed font-inter">
-              This system was conceptualized, designed, and developed under the academic guidance of:
-            </p>
-            <div className="bg-slate-800/40 p-5 rounded-2xl border border-slate-700/50">
-              <p className="text-base font-bold text-white font-outfit">Dr. Nazia Majadi</p>
-              <p className="text-xs text-slate-400 mt-0.5">Professor, Dept. of CSTE</p>
-              <p className="text-xs text-slate-500 font-semibold mt-1">Noakhali Science & Technology University</p>
+            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/60 shadow-sm text-center">
+              <p className="text-2xl font-black text-brand-500 font-outfit">20-35m</p>
+              <p className="text-[10px] text-slate-500 font-bold uppercase mt-1">Delivery Time</p>
+              <p className="text-[9px] text-slate-400 font-semibold mt-0.5">Automated Dispatch</p>
             </div>
           </div>
-
-          {/* Right Column: Creators */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2.5">
-              <Users className="w-7 h-7 text-amber-400" />
-              <h2 className="text-lg font-black font-outfit">Project Creators</h2>
-            </div>
-            <p className="text-xs text-slate-400 font-medium leading-relaxed font-inter">
-              Designed & implemented by Department of CSTE students:
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="bg-slate-800/40 p-4 rounded-xl border border-slate-700/50 text-left">
-                <p className="text-xs font-bold text-white">Maknoon Sultana</p>
-                <p className="text-[10px] text-slate-400 mt-1">ID: NFH2201007F</p>
-              </div>
-              <div className="bg-slate-800/40 p-4 rounded-xl border border-slate-700/50 text-left">
-                <p className="text-xs font-bold text-white">Umme Nur Sadia</p>
-                <p className="text-[10px] text-slate-400 mt-1">ID: BKH2201020F</p>
-              </div>
-            </div>
-          </div>
-
         </div>
+
+        {/* Row 2: Services */}
+        <div className="space-y-6">
+          <h2 className="text-xl sm:text-2xl font-black font-outfit text-slate-900 text-center">Premium Platform Services</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <div className="flex flex-col items-center text-center p-6 bg-slate-50 rounded-2xl border border-slate-200/60 shadow-sm space-y-3">
+              <div className="w-12 h-12 rounded-xl bg-brand-50 text-brand-500 flex items-center justify-center shrink-0">
+                <Sparkles className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-xs sm:text-sm font-black text-slate-900">Gourmet Curation</h4>
+                <p className="text-[10px] sm:text-xs text-slate-500 leading-relaxed">
+                  We partner only with sanitary and top-rated restaurants, verifying their quality index continuously.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center text-center p-6 bg-slate-50 rounded-2xl border border-slate-200/60 shadow-sm space-y-3">
+              <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center shrink-0">
+                <Clock className="w-6 h-6 animate-pulse" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-xs sm:text-sm font-black text-slate-900">Hyper-Fast Logistics</h4>
+                <p className="text-[10px] sm:text-xs text-slate-500 leading-relaxed">
+                  Real-time automatic rider matching ensures your meal is dispatched fresh from the kitchen pan.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center text-center p-6 bg-slate-50 rounded-2xl border border-slate-200/60 shadow-sm space-y-3">
+              <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-500 flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-xs sm:text-sm font-black text-slate-900">Secure Checkout</h4>
+                <p className="text-[10px] sm:text-xs text-slate-500 leading-relaxed">
+                  Frictionless payments via bKash, Nagad, or credit cards, backed by full transaction encryption.
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
       </div>
 
       {/* SECTION 2: Customer Testimonials Section */}
@@ -180,14 +205,20 @@ export default function AboutContact() {
         </div>
       </section>
 
-      {/* SECTION 3: Contact Section (Form & Hotline Details) */}
-      <div id="contact" className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start scroll-mt-20">
-        
+      {/* Heading for Contact Support */}
+      <div id="contact" className="text-center scroll-mt-20">
+        <h1 className="text-4xl sm:text-5xl font-black tracking-tight font-outfit">
+          <span className="bg-gradient-to-r from-brand-600 to-amber-500 bg-clip-text text-transparent">Contact Support</span>
+        </h1>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
         {/* Left Column: Central Contact Info Details (5 cols) */}
         <div className="lg:col-span-5 space-y-6">
           <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
             <h3 className="font-black text-slate-900 text-sm font-outfit">Central Contact Details</h3>
-            
+
             <div className="space-y-3.5 text-xs font-semibold text-slate-600 font-inter">
               <div className="flex items-center gap-3">
                 <div className="w-8.5 h-8.5 rounded-lg bg-slate-50 text-blue-500 flex items-center justify-center shrink-0">
@@ -235,7 +266,7 @@ export default function AboutContact() {
         {/* Right Column: Contact/Feedback Form (7 cols) */}
         <div className="lg:col-span-7 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-sm">
           <h2 className="text-xl font-black text-slate-900 mb-6 font-outfit">Contact Us by Email</h2>
-          
+
           {success ? (
             <div className="bg-emerald-50 border border-emerald-100 p-6 rounded-2xl text-center space-y-3">
               <ShieldCheck className="w-12 h-12 text-emerald-500 mx-auto" />
@@ -290,11 +321,10 @@ export default function AboutContact() {
                       key={star}
                       type="button"
                       onClick={() => setRating(star)}
-                      className={`w-9 h-9 rounded-xl font-black text-xs transition-all ${
-                        rating >= star
-                          ? 'bg-amber-400 text-slate-900 shadow-sm'
-                          : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
-                      }`}
+                      className={`w-9 h-9 rounded-xl font-black text-xs transition-all ${rating >= star
+                        ? 'bg-amber-400 text-slate-900 shadow-sm'
+                        : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
+                        }`}
                     >
                       {star} ★
                     </button>

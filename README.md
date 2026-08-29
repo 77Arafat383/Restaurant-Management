@@ -1,12 +1,5 @@
 # QuickBite — Online Food Ordering System
 
-> **Software Engineering & Information System Design Lab (CSTE3310)**  
-> **Noakhali Science & Technology University (NSTU)**  
-> **Course Supervisor:** Dr. Nazia Majadi (Professor, Dept. of CSTE)  
-> **Authors:** Maknoon Sultana (NFH2201007F), Umme Nur Sadia (BKH2201020F)
-
----
-
 ## 🚀 Overview & Key Features
 
 QuickBite is an enterprise-grade, high-performance food ordering platform built using **Next.js 14 (App Router)**, **PostgreSQL (Prisma ORM)**, and **Tailwind CSS**, fully optimized for ultra-fast response times and one-click **Vercel** deployment.

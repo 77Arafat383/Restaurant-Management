@@ -98,14 +98,14 @@ export default function AboutContact() {
 
       {/* SECTION 1: About Section (Platform Story & Core Services) */}
       <div id="about" className="space-y-12 scroll-mt-20">
-        
+
         {/* Row 1: Story & Mission */}
         <div className="text-center space-y-4 max-w-3xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-black font-outfit text-slate-900">Our Story & Mission</h2>
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium font-inter max-w-2xl mx-auto">
             QuickBite is Dhaka's premier online food ordering and delivery service. We connect food enthusiasts with top-rated local kitchens, providing a seamless ordering experience powered by hyper-local routing and real-time delivery agents.
           </p>
-          
+
           <div className="grid grid-cols-2 gap-4 max-w-md mx-auto pt-2">
             <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/60 shadow-sm text-center">
               <p className="text-2xl font-black text-amber-500 font-outfit">4.9 ★</p>
@@ -124,7 +124,7 @@ export default function AboutContact() {
         <div className="space-y-6">
           <h2 className="text-xl sm:text-2xl font-black font-outfit text-slate-900 text-center">Premium Platform Services</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
+
             <div className="flex flex-col items-center text-center p-6 bg-slate-50 rounded-2xl border border-slate-200/60 shadow-sm space-y-3">
               <div className="w-12 h-12 rounded-xl bg-brand-50 text-brand-500 flex items-center justify-center shrink-0">
                 <Sparkles className="w-6 h-6" />
@@ -208,7 +208,7 @@ export default function AboutContact() {
       {/* Heading for Contact Support */}
       <div id="contact" className="text-center scroll-mt-20">
         <h1 className="text-4xl sm:text-5xl font-black tracking-tight font-outfit">
-          <span className="bg-gradient-to-r from-brand-600 to-amber-500 bg-clip-text text-transparent">Contact Support</span>
+          <span className="bg-gradient-to-r from-brand-600 to-amber-500 bg-clip-text text-transparent">Contact</span>
         </h1>
       </div>
 
@@ -258,7 +258,7 @@ export default function AboutContact() {
               <Clock className="w-5 h-5 text-emerald-400 animate-pulse" /> Delivery Hours
             </h3>
             <p className="text-xs text-slate-400 font-semibold font-inter leading-relaxed">
-              Our automated kitchen dispatch routing and live rider tracking operate continuously from **8:00 AM to 11:30 PM** every day.
+              Our automated kitchen dispatch routing and live rider tracking operate continuously from 8:00 AM to 11:30 PM every day.
             </p>
           </div>
         </div>
@@ -313,24 +313,7 @@ export default function AboutContact() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Rate Experience</label>
-                <div className="flex gap-2 mt-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      onClick={() => setRating(star)}
-                      className={`w-9 h-9 rounded-xl font-black text-xs transition-all ${rating >= star
-                        ? 'bg-amber-400 text-slate-900 shadow-sm'
-                        : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
-                        }`}
-                    >
-                      {star} ★
-                    </button>
-                  ))}
-                </div>
-              </div>
+
 
               <div>
                 <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Message *</label>

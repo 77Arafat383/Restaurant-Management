@@ -18,7 +18,6 @@ import {
   Flame, 
   ShieldCheck, 
   Send,
-  Sparkles,
   RefreshCw
 } from 'lucide-react';
 
@@ -65,31 +64,6 @@ export default function OrderTrackingPage() {
   useEffect(() => {
     fetchOrder();
   }, [orderId]);
-
-  // Simulation tool: Advance order status
-  const handleAdvanceStatus = async () => {
-    if (!order) return;
-    const currentIdx = STATUS_STEPS.findIndex(s => s.status === order.status);
-    const nextStatus = currentIdx < STATUS_STEPS.length - 1 ? STATUS_STEPS[currentIdx + 1].status : 'DELIVERED';
-
-    try {
-      const res = await fetch(`/api/orders/${order.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          status: nextStatus,
-          deliveryPersonName: 'Rakibul Hasan',
-          deliveryPersonPhone: '+880 1912-334455'
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setOrder(data.data);
-      }
-    } catch (e) {
-      console.error('Failed to update status', e);
-    }
-  };
 
   // Submit Feedback
   const handleSubmitReview = async (e: React.FormEvent) => {
@@ -182,16 +156,6 @@ export default function OrderTrackingPage() {
           >
             <RefreshCw className="w-4 h-4" />
           </button>
-
-          {order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && order.status !== 'REJECTED' && (
-            <button
-              onClick={handleAdvanceStatus}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-amber-500 text-white text-xs font-bold shadow-md shadow-brand-500/20 hover:scale-105 transition-all"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Simulate Next Progress Step</span>
-            </button>
-          )}
         </div>
       </div>
 

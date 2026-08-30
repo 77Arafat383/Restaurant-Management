@@ -27,7 +27,21 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
   const [restaurantName, setRestaurantName] = useState<string | null>(null);
   const [deliveryFee, setDeliveryFee] = useState<number>(40);
+  const [vatRate, setVatRate] = useState<number>(0.05);
   const [isCartOpen, setIsCartOpen] = useState(false);
+
+  // Fetch system config (VAT rate & delivery charge) on mount
+  useEffect(() => {
+    fetch('/api/config')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.data) {
+          setVatRate(data.data.vatRate);
+          setDeliveryFee(data.data.deliveryCharge);
+        }
+      })
+      .catch(err => console.error('Failed to load system config from API:', err));
+  }, []);
 
   useEffect(() => {
     try {
@@ -78,8 +92,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setCart(newItems);
       setRestaurantId(item.restaurantId);
       setRestaurantName(restName);
-      setDeliveryFee(40);
-      saveCartToStorage(newItems, item.restaurantId, restName, 40);
+      setDeliveryFee(deliveryFee);
+      saveCartToStorage(newItems, item.restaurantId, restName, deliveryFee);
       setIsCartOpen(true);
       return true;
     }
@@ -149,12 +163,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setCart([]);
     setRestaurantId(null);
     setRestaurantName(null);
-    saveCartToStorage([], null, null, 40);
+    saveCartToStorage([], null, null, deliveryFee);
   };
 
   const totalItems = cart.reduce((acc, curr) => acc + curr.quantity, 0);
   const subtotal = cart.reduce((acc, curr) => acc + curr.foodItem.price * curr.quantity, 0);
-  const tax = Math.round(subtotal * 0.05); // 5% VAT
+  const tax = Math.round(subtotal * vatRate);
   const totalAmount = totalItems > 0 ? subtotal + deliveryFee + tax : 0;
 
   return (

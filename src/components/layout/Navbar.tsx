@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import {
@@ -23,6 +24,27 @@ export default function Navbar() {
   const { currentUser, logout, openAuthModal } = useAuth();
   const { totalItems, setIsCartOpen } = useCart();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const pathname = usePathname();
+  const [activeLink, setActiveLink] = useState<string>('/');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const currentPath = window.location.pathname;
+      const currentHash = window.location.hash;
+
+      if (currentPath === '/') {
+        setActiveLink('/');
+      } else if (currentPath.startsWith('/about')) {
+        if (currentHash === '#contact') {
+          setActiveLink('/about#contact');
+        } else {
+          setActiveLink('/about#about');
+        }
+      } else {
+        setActiveLink(currentPath);
+      }
+    }
+  }, [pathname]);
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-sm">
@@ -50,24 +72,64 @@ export default function Navbar() {
 
           {/* Quick Nav Links */}
           <nav className="hidden md:flex items-center gap-3 text-xs font-bold">
-            <Link href="/" className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-brand-50 hover:text-brand-600 text-slate-700 transition-all">
+            <Link
+              href="/"
+              onClick={() => setActiveLink('/')}
+              className={`px-3.5 py-2 rounded-xl transition-all ${
+                activeLink === '/'
+                  ? 'bg-brand-50 text-brand-600'
+                  : 'bg-slate-100 text-slate-700 hover:bg-brand-50 hover:text-brand-600'
+              }`}
+            >
               Restaurants
             </Link>
 
-            <Link href="/about#about" className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-brand-50 hover:text-brand-600 text-slate-700 transition-all">
+            <Link
+              href="/about#about"
+              onClick={() => setActiveLink('/about#about')}
+              className={`px-3.5 py-2 rounded-xl transition-all ${
+                activeLink === '/about#about'
+                  ? 'bg-brand-50 text-brand-600'
+                  : 'bg-slate-100 text-slate-700 hover:bg-brand-50 hover:text-brand-600'
+              }`}
+            >
               About Us
             </Link>
 
-            <Link href="/about#contact" className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-brand-50 hover:text-brand-600 text-slate-700 transition-all">
+            <Link
+              href="/about#contact"
+              onClick={() => setActiveLink('/about#contact')}
+              className={`px-3.5 py-2 rounded-xl transition-all ${
+                activeLink === '/about#contact'
+                  ? 'bg-brand-50 text-brand-600'
+                  : 'bg-slate-100 text-slate-700 hover:bg-brand-50 hover:text-brand-600'
+              }`}
+            >
               Contact
             </Link>
 
             {currentUser && (
               <>
-                <Link href="/orders" className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-brand-50 hover:text-brand-600 text-slate-700 transition-all">
+                <Link
+                  href="/orders"
+                  onClick={() => setActiveLink('/orders')}
+                  className={`px-3.5 py-2 rounded-xl transition-all ${
+                    activeLink === '/orders'
+                      ? 'bg-brand-50 text-brand-600'
+                      : 'bg-slate-100 text-slate-700 hover:bg-brand-50 hover:text-brand-600'
+                  }`}
+                >
                   My Orders
                 </Link>
-                <Link href="/orders/order_1001" className="px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/50 transition-all flex items-center gap-1.5">
+                <Link
+                  href="/orders/order_1001"
+                  onClick={() => setActiveLink('/orders/order_1001')}
+                  className={`px-3.5 py-2 rounded-xl border border-emerald-200/50 transition-all flex items-center gap-1.5 ${
+                    activeLink === '/orders/order_1001'
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700'
+                  }`}
+                >
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                   Live Tracking
                 </Link>
@@ -75,17 +137,41 @@ export default function Navbar() {
             )}
 
             {currentUser?.role === 'RESTAURANT_MANAGER' && (
-              <Link href="/restaurant" className="px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200/50 transition-all flex items-center gap-1.5">
+              <Link
+                href="/restaurant"
+                onClick={() => setActiveLink('/restaurant')}
+                className={`px-3.5 py-2 rounded-xl border border-amber-200/50 transition-all flex items-center gap-1.5 ${
+                  activeLink === '/restaurant'
+                    ? 'bg-amber-100 text-amber-800'
+                    : 'bg-amber-50 hover:bg-amber-100 text-amber-700'
+                }`}
+              >
                 <Store className="w-3.5 h-3.5" /> Kitchen Portal
               </Link>
             )}
             {currentUser?.role === 'DELIVERY_PERSON' && (
-              <Link href="/delivery" className="px-3.5 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200/50 transition-all flex items-center gap-1.5">
+              <Link
+                href="/delivery"
+                onClick={() => setActiveLink('/delivery')}
+                className={`px-3.5 py-2 rounded-xl border border-blue-200/50 transition-all flex items-center gap-1.5 ${
+                  activeLink === '/delivery'
+                    ? 'bg-blue-100 text-blue-800'
+                    : 'bg-blue-50 hover:bg-blue-100 text-blue-700'
+                }`}
+              >
                 <Bike className="w-3.5 h-3.5" /> Rider Portal
               </Link>
             )}
             {currentUser?.role === 'ADMIN' && (
-              <Link href="/admin" className="px-3.5 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200/50 transition-all flex items-center gap-1.5">
+              <Link
+                href="/admin"
+                onClick={() => setActiveLink('/admin')}
+                className={`px-3.5 py-2 rounded-xl border border-purple-200/50 transition-all flex items-center gap-1.5 ${
+                  activeLink === '/admin'
+                    ? 'bg-purple-100 text-purple-800'
+                    : 'bg-purple-50 hover:bg-purple-100 text-purple-700'
+                }`}
+              >
                 <ShieldCheck className="w-3.5 h-3.5" /> Admin Console
               </Link>
             )}

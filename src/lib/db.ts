@@ -27,6 +27,10 @@ interface DatabaseSchema {
   foodItems: FoodItem[];
   orders: Order[];
   feedbacks: Feedback[];
+  config?: {
+    vatRate: number;
+    deliveryCharge: number;
+  };
 }
 
 class PersistentStore {
@@ -39,6 +43,7 @@ class PersistentStore {
       foodItems: [...INITIAL_FOOD_ITEMS],
       orders: [...INITIAL_ORDERS],
       feedbacks: [...INITIAL_FEEDBACKS],
+      config: { vatRate: 0.05, deliveryCharge: 40 },
     };
     this.loadFromDisk();
   }
@@ -65,6 +70,7 @@ class PersistentStore {
           foodItems: parsed.foodItems || [...INITIAL_FOOD_ITEMS],
           orders: parsed.orders || [...INITIAL_ORDERS],
           feedbacks: parsed.feedbacks || [...INITIAL_FEEDBACKS],
+          config: parsed.config || { vatRate: 0.05, deliveryCharge: 40 },
         };
       } else {
         this.saveToDisk();
@@ -365,6 +371,26 @@ class PersistentStore {
       return deleted;
     }
     return null;
+  }
+
+  // --- Config Operations ---
+  getConfig() {
+    this.loadFromDisk();
+    if (!this.data.config) {
+      this.data.config = { vatRate: 0.05, deliveryCharge: 40 };
+      this.saveToDisk();
+    }
+    return this.data.config;
+  }
+
+  updateConfig(updates: { vatRate?: number; deliveryCharge?: number }) {
+    this.loadFromDisk();
+    if (!this.data.config) {
+      this.data.config = { vatRate: 0.05, deliveryCharge: 40 };
+    }
+    this.data.config = { ...this.data.config, ...updates };
+    this.saveToDisk();
+    return this.data.config;
   }
 }
 

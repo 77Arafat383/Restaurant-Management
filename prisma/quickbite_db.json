@@ -262,20 +262,6 @@
       "preparationTime": "15 min"
     },
     {
-      "id": "food_5",
-      "restaurantId": "rest_2",
-      "name": "Crispy Peri-Peri Fries",
-      "description": "Hand-cut golden skin-on fries tossed in zesty African peri-peri spices with garlic mayo dip.",
-      "price": 160,
-      "category": "Sides",
-      "isAvailable": true,
-      "image": "https://images.unsplash.com/photo-1576107232684-1279f3908594?w=500&auto=format&fit=crop&q=80",
-      "isVeg": true,
-      "isSpicy": true,
-      "rating": 4.6,
-      "preparationTime": "10 min"
-    },
-    {
       "id": "food_6",
       "restaurantId": "rest_3",
       "name": "Woodfired Quattro Formaggi Pizza (12 inch)",
@@ -661,5 +647,9 @@
       "comment": "The Kacchi Biryani was steaming hot and mouth melting! Borhani was chilled and perfectly spiced.",
       "createdAt": "2026-08-29T23:55:00.000Z"
     }
-  ]
+  ],
+  "config": {
+    "vatRate": 0.05,
+    "deliveryCharge": 40
+  }
 }

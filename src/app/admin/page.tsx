@@ -17,12 +17,13 @@ import {
   FileText,
   Search,
   Activity,
-  Trash2
+  Trash2,
+  Settings
 } from 'lucide-react';
 
 export default function AdminConsolePage() {
   const { currentUser } = useAuth();
-  const [activeSection, setActiveSection] = useState<'OVERVIEW' | 'USERS' | 'RESTAURANTS' | 'ORDERS' | 'FEEDBACK'>('OVERVIEW');
+  const [activeSection, setActiveSection] = useState<'OVERVIEW' | 'USERS' | 'RESTAURANTS' | 'ORDERS' | 'FEEDBACK' | 'SETTINGS'>('OVERVIEW');
 
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -39,10 +40,34 @@ export default function AdminConsolePage() {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // System Configuration States
+  const [vatRate, setVatRate] = useState(0.05);
+  const [deliveryFee, setDeliveryFee] = useState(40);
+  const [vatInput, setVatInput] = useState('5');
+  const [deliveryInput, setDeliveryInput] = useState('40');
+  const [isSavingConfig, setIsSavingConfig] = useState(false);
+  const [configSuccess, setConfigSuccess] = useState(false);
+  const [configError, setConfigError] = useState<string | null>(null);
+
   // Search States
   const [searchTransactions, setSearchTransactions] = useState('');
   const [searchUsers, setSearchUsers] = useState('');
   const [searchRestaurants, setSearchRestaurants] = useState('');
+
+  const fetchConfigData = async () => {
+    try {
+      const res = await fetch('/api/config');
+      const data = await res.json();
+      if (data.success && data.data) {
+        setVatRate(data.data.vatRate);
+        setDeliveryFee(data.data.deliveryCharge);
+        setVatInput((data.data.vatRate * 100).toString());
+        setDeliveryInput(data.data.deliveryCharge.toString());
+      }
+    } catch (e) {
+      console.error('Failed to load system config', e);
+    }
+  };
 
   const fetchAdminData = async () => {
     try {
@@ -56,10 +81,56 @@ export default function AdminConsolePage() {
         setRecentOrders(data.data.recentOrders);
         setFeedbacks(data.data.feedbacks);
       }
+      await fetchConfigData();
     } catch (e) {
       console.error('Failed to load admin stats', e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveConfig = async () => {
+    const rawVat = parseFloat(vatInput);
+    const rawDelivery = parseFloat(deliveryInput);
+
+    if (isNaN(rawVat) || rawVat < 0 || rawVat > 100) {
+      setConfigError('Please enter a valid VAT rate between 0% and 100%.');
+      return;
+    }
+    if (isNaN(rawDelivery) || rawDelivery < 0) {
+      setConfigError('Please enter a valid delivery charge.');
+      return;
+    }
+
+    setIsSavingConfig(true);
+    setConfigError(null);
+    setConfigSuccess(false);
+
+    try {
+      const res = await fetch('/api/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          vatRate: rawVat / 100,
+          deliveryCharge: rawDelivery,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setVatRate(data.data.vatRate);
+        setDeliveryFee(data.data.deliveryCharge);
+        setVatInput((data.data.vatRate * 100).toString());
+        setDeliveryInput(data.data.deliveryCharge.toString());
+        setConfigSuccess(true);
+        setTimeout(() => setConfigSuccess(false), 3000);
+      } else {
+        setConfigError(data.error || 'Failed to save configuration.');
+      }
+    } catch (err) {
+      setConfigError('Network error. Please try again.');
+    } finally {
+      setIsSavingConfig(false);
     }
   };
 
@@ -261,6 +332,7 @@ export default function AdminConsolePage() {
           { id: 'USERS', label: `User Directory (${users.length})` },
           { id: 'RESTAURANTS', label: `Restaurant Approvals (${restaurants.length})` },
           { id: 'FEEDBACK', label: `Customer Feedback (${feedbacks.length})` },
+          { id: 'SETTINGS', label: 'System Settings' },
         ].map(tab => (
           <button
             key={tab.id}
@@ -520,6 +592,91 @@ export default function AdminConsolePage() {
                 </button>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* SECTION 5: System Settings */}
+      {activeSection === 'SETTINGS' && (
+        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-sm space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center font-bold">
+              <Settings className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-base font-black text-slate-900">System Configuration</h3>
+              <p className="text-xs text-slate-500 font-medium">Configure global transaction calculations (VAT rate & express delivery charge).</p>
+            </div>
+          </div>
+
+          {configError && (
+            <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">
+              {configError}
+            </div>
+          )}
+
+          {configSuccess && (
+            <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold">
+              System configuration updated successfully!
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                VAT / Tax Rate (%)
+              </label>
+              <div className="relative">
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  value={vatInput}
+                  onChange={(e) => {
+                    setVatInput(e.target.value);
+                    setConfigError(null);
+                  }}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-800"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">%</span>
+              </div>
+              <p className="text-[10px] text-slate-500 leading-relaxed font-medium">
+                Applied to subtotal. Current: {(vatRate * 100).toFixed(1)}% (calculates as subtotal × {vatRate}).
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                Express Delivery Charge (BDT)
+              </label>
+              <div className="relative">
+                <input
+                  type="number"
+                  min="0"
+                  value={deliveryInput}
+                  onChange={(e) => {
+                    setDeliveryInput(e.target.value);
+                    setConfigError(null);
+                  }}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-800"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">BDT</span>
+              </div>
+              <p className="text-[10px] text-slate-500 leading-relaxed font-medium">
+                Flat fee added to each order. Current: BDT {deliveryFee}.
+              </p>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-slate-100 flex justify-start">
+            <button
+              onClick={handleSaveConfig}
+              disabled={isSavingConfig}
+              className="px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white rounded-xl text-xs font-black shadow-lg shadow-purple-500/25 transition-all uppercase tracking-wider"
+            >
+              {isSavingConfig ? 'Saving Settings...' : 'Save Configuration'}
+            </button>
           </div>
         </div>
       )}

@@ -6,17 +6,17 @@ import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { PaymentMethod } from '@/lib/types';
 import { formatPrice } from '@/lib/utils';
-import { 
-  MapPin, 
-  Phone, 
-  CreditCard, 
-  Banknote, 
-  ArrowLeft, 
-  CheckCircle2, 
-  ShoppingBag, 
-  ShieldCheck, 
-  Lock, 
-  ArrowRight, 
+import {
+  MapPin,
+  Phone,
+  CreditCard,
+  Banknote,
+  ArrowLeft,
+  CheckCircle2,
+  ShoppingBag,
+  ShieldCheck,
+  Lock,
+  ArrowRight,
   AlertCircle,
   LogIn,
   UserPlus,
@@ -39,7 +39,7 @@ export default function CheckoutPage() {
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [deliveryNotes, setDeliveryNotes] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('BKASH');
-  
+
   // Payment simulation state
   const [mobileNumber, setMobileNumber] = useState('01711223344');
   const [mfsPin, setMfsPin] = useState('••••');
@@ -47,8 +47,26 @@ export default function CheckoutPage() {
   const [cardExpiry, setCardExpiry] = useState('12/28');
   const [cardCvc, setCardCvc] = useState('789');
 
+  // bKash Checkout Inline Simulation States
+  const [bkashStep, setBkashStep] = useState<1 | 2 | 3>(1);
+  const [bkashNumber, setBkashNumber] = useState('01711223344');
+  const [bkashOtp, setBkashOtp] = useState('');
+  const [bkashPin, setBkashPin] = useState('');
+  const [bkashError, setBkashError] = useState<string | null>(null);
+  const [otpCountdown, setOtpCountdown] = useState(60);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Card Checkout Inline Simulation States
+  const [cardStep, setCardStep] = useState<1 | 2 | 3>(1);
+  const [cardHolder, setCardHolder] = useState('');
+  const [cardNumberInput, setCardNumberInput] = useState('');
+  const [cardExpiryInput, setCardExpiryInput] = useState('');
+  const [cardCvcInput, setCardCvcInput] = useState('');
+  const [cardOtp, setCardOtp] = useState('');
+  const [cardOtpCountdown, setCardOtpCountdown] = useState(60);
+  const [cardError, setCardError] = useState<string | null>(null);
 
   // In-line Checkout Auth Gate States (for guest visitors)
   const [authTab, setAuthTab] = useState<'login' | 'register'>('login');
@@ -67,8 +85,31 @@ export default function CheckoutPage() {
       setCustomerName(currentUser.name || '');
       setCustomerPhone(currentUser.phone || '+880 1711-223344');
       setDeliveryAddress(currentUser.address || 'House 42, Road 11, Dhanmondi, Dhaka');
+      setCardHolder(currentUser.name || '');
     }
   }, [currentUser]);
+
+  // bKash OTP countdown timer
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (paymentMethod === 'BKASH' && bkashStep === 2 && otpCountdown > 0) {
+      timer = setTimeout(() => setOtpCountdown(prev => prev - 1), 1000);
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [paymentMethod, bkashStep, otpCountdown]);
+
+  // Card OTP countdown timer
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (paymentMethod === 'CARD' && cardStep === 2 && cardOtpCountdown > 0) {
+      timer = setTimeout(() => setCardOtpCountdown(prev => prev - 1), 1000);
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [paymentMethod, cardStep, cardOtpCountdown]);
 
   if (cart.length === 0) {
     return (
@@ -139,6 +180,32 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (paymentMethod === 'BKASH') {
+      if (bkashStep !== 3 || bkashPin.length !== 5) {
+        setErrorMsg('Please complete all 3 steps of the bKash verification procedure below first.');
+        setBkashError('Please enter your 5-digit PIN to authorize payment.');
+        // Scroll to MFS block
+        const element = document.getElementById('payment-section');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+        return;
+      }
+    }
+
+    if (paymentMethod === 'CARD') {
+      if (cardStep !== 3) {
+        setErrorMsg('Please complete the Credit/Debit Card verification procedure below first.');
+        setCardError('Please authorize your card via OTP verification to proceed.');
+        // Scroll to Card block
+        const element = document.getElementById('payment-section');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     setErrorMsg(null);
 
@@ -190,7 +257,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      
+
       {/* Top Header */}
       <div className="mb-8">
         <Link
@@ -215,10 +282,10 @@ export default function CheckoutPage() {
       {/* If Guest User (Not Logged In): Show Auth Gate Card */}
       {!currentUser ? (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
+
           <div className="lg:col-span-7">
             <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/90 shadow-xl space-y-6">
-              
+
               {/* Alert Badge */}
               <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold flex items-center gap-3">
                 <Sparkles className="w-5 h-5 text-amber-600 shrink-0" />
@@ -242,22 +309,20 @@ export default function CheckoutPage() {
                 <button
                   type="button"
                   onClick={() => { setAuthTab('login'); setAuthError(null); }}
-                  className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${
-                    authTab === 'login'
+                  className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${authTab === 'login'
                       ? 'bg-white text-slate-900 shadow-sm'
                       : 'text-slate-500 hover:text-slate-800'
-                  }`}
+                    }`}
                 >
                   <LogIn className="w-3.5 h-3.5 inline mr-1.5" /> Sign In
                 </button>
                 <button
                   type="button"
                   onClick={() => { setAuthTab('register'); setAuthError(null); }}
-                  className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${
-                    authTab === 'register'
+                  className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${authTab === 'register'
                       ? 'bg-white text-slate-900 shadow-sm'
                       : 'text-slate-500 hover:text-slate-800'
-                  }`}
+                    }`}
                 >
                   <UserPlus className="w-3.5 h-3.5 inline mr-1.5" /> Create Account (Register)
                 </button>
@@ -490,10 +555,10 @@ export default function CheckoutPage() {
       ) : (
         /* Authenticated Customer Form */
         <form onSubmit={handlePlaceOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
+
           {/* Left Form: Delivery & Payment Details */}
           <div className="lg:col-span-7 space-y-6">
-            
+
             {/* Delivery Address Card */}
             <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -558,27 +623,29 @@ export default function CheckoutPage() {
             </div>
 
             {/* Payment Method Selection Card */}
-            <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
+            <div id="payment-section" className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
               <div className="flex items-center gap-2.5 text-slate-900 font-black text-base border-b border-slate-100 pb-3">
                 <ShieldCheck className="w-5 h-5 text-emerald-600" />
                 <span>2. Payment Method</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {/* bKash / Nagad MFS */}
+                {/* bKash MFS */}
                 <button
                   type="button"
-                  onClick={() => setPaymentMethod('BKASH')}
-                  className={`p-4 rounded-2xl border text-left transition-all ${
-                    paymentMethod === 'BKASH' || paymentMethod === 'NAGAD'
+                  onClick={() => {
+                    setPaymentMethod('BKASH');
+                    setBkashError(null);
+                  }}
+                  className={`p-4 rounded-2xl border text-left transition-all ${paymentMethod === 'BKASH'
                       ? 'border-pink-500 bg-pink-50/50 shadow-md shadow-pink-500/10'
                       : 'border-slate-200 hover:border-slate-300 bg-white'
-                  }`}
+                    }`}
                 >
                   <div className="w-9 h-9 rounded-xl bg-pink-600 text-white flex items-center justify-center mb-2 font-black text-xs">
                     bK
                   </div>
-                  <p className="text-xs font-black text-slate-900">bKash / Nagad</p>
+                  <p className="text-xs font-black text-slate-900">bKash</p>
                   <p className="text-[10px] text-slate-500">Instant Mobile Pay</p>
                 </button>
 
@@ -586,11 +653,10 @@ export default function CheckoutPage() {
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('CARD')}
-                  className={`p-4 rounded-2xl border text-left transition-all ${
-                    paymentMethod === 'CARD'
+                  className={`p-4 rounded-2xl border text-left transition-all ${paymentMethod === 'CARD'
                       ? 'border-brand-500 bg-brand-50/50 shadow-md shadow-brand-500/10'
                       : 'border-slate-200 hover:border-slate-300 bg-white'
-                  }`}
+                    }`}
                 >
                   <div className="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center mb-2">
                     <CreditCard className="w-4 h-4" />
@@ -603,11 +669,10 @@ export default function CheckoutPage() {
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('COD')}
-                  className={`p-4 rounded-2xl border text-left transition-all ${
-                    paymentMethod === 'COD'
+                  className={`p-4 rounded-2xl border text-left transition-all ${paymentMethod === 'COD'
                       ? 'border-emerald-500 bg-emerald-50/50 shadow-md shadow-emerald-500/10'
                       : 'border-slate-200 hover:border-slate-300 bg-white'
-                  }`}
+                    }`}
                 >
                   <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center mb-2">
                     <Banknote className="w-4 h-4" />
@@ -617,75 +682,379 @@ export default function CheckoutPage() {
                 </button>
               </div>
 
-              {/* MFS Simulation Box */}
-              {(paymentMethod === 'BKASH' || paymentMethod === 'NAGAD') && (
-                <div className="p-4 rounded-2xl bg-pink-50/80 border border-pink-200/80 space-y-3">
-                  <div className="flex items-center justify-between text-xs text-pink-900 font-bold">
-                    <span>bKash / Nagad Instant Checkout Gateway</span>
-                    <Lock className="w-3.5 h-3.5 text-pink-600" />
+              {/* bKash Simulation Box */}
+              {paymentMethod === 'BKASH' && (
+                <div className="p-4 rounded-2xl bg-pink-50/85 border border-pink-200/80 space-y-4">
+                  <div className="flex items-center justify-between text-xs text-pink-955 font-black border-b border-pink-100 pb-2">
+                    <span className="flex items-center gap-1.5 text-pink-900">
+                      <Lock className="w-3.5 h-3.5 text-pink-600 font-bold" />
+                      bKash Checkout Procedure
+                    </span>
+                    <span className="text-[9px] bg-pink-600 text-white px-2 py-0.5 rounded-full font-black uppercase tracking-wider">
+                      Step {bkashStep} of 3
+                    </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-[11px] font-semibold text-slate-700 mb-1">MFS Mobile No.</label>
-                      <input
-                        type="text"
-                        value={mobileNumber}
-                        onChange={(e) => setMobileNumber(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl bg-white border border-pink-300 text-xs font-mono font-bold"
-                      />
+
+                  {bkashStep === 1 && (
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-[10px] uppercase font-bold text-slate-700 mb-1">
+                          bKash Mobile Number
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 font-mono">+880</span>
+                          <input
+                            type="tel"
+                            maxLength={11}
+                            placeholder="e.g. 01711223344"
+                            value={bkashNumber}
+                            onChange={(e) => {
+                              setBkashNumber(e.target.value.replace(/\D/g, ''));
+                              setBkashError(null);
+                            }}
+                            className="w-full pl-14 pr-4 py-2 rounded-xl bg-white border border-pink-300 text-xs font-mono font-bold text-slate-800 focus:outline-none focus:border-pink-500"
+                          />
+                        </div>
+                        {bkashError && <p className="text-[10px] text-red-600 font-bold mt-1">{bkashError}</p>}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (bkashNumber.length !== 11 || !bkashNumber.startsWith('01')) {
+                            setBkashError('Please enter a valid 11-digit bKash number.');
+                            return;
+                          }
+                          setBkashStep(2);
+                          setOtpCountdown(60);
+                          setBkashError(null);
+                        }}
+                        className="w-full py-2 bg-pink-600 hover:bg-pink-700 text-white font-bold text-xs rounded-xl shadow-md shadow-pink-500/10 transition-colors"
+                      >
+                        Send Verification Code (OTP)
+                      </button>
                     </div>
-                    <div>
-                      <label className="block text-[11px] font-semibold text-slate-700 mb-1">PIN / OTP Code</label>
-                      <input
-                        type="password"
-                        value={mfsPin}
-                        onChange={(e) => setMfsPin(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl bg-white border border-pink-300 text-xs font-mono font-bold"
-                      />
+                  )}
+
+                  {bkashStep === 2 && (
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-[10px] uppercase font-bold text-slate-700 mb-1">
+                          Verification Code (OTP)
+                        </label>
+                        <input
+                          type="text"
+                          maxLength={6}
+                          placeholder="Enter 6-digit OTP (e.g. 123456)"
+                          value={bkashOtp}
+                          onChange={(e) => {
+                            setBkashOtp(e.target.value.replace(/\D/g, ''));
+                            setBkashError(null);
+                          }}
+                          className="w-full px-4 py-2 rounded-xl bg-white border border-pink-300 text-xs font-mono font-bold tracking-widest text-center text-slate-800 focus:outline-none focus:border-pink-500"
+                        />
+                        {bkashError && <p className="text-[10px] text-red-600 font-bold mt-1">{bkashError}</p>}
+                      </div>
+                      <div className="flex justify-between items-center text-[10px] text-pink-700 font-bold">
+                        <span>Didn't receive verification code?</span>
+                        {otpCountdown > 0 ? (
+                          <span>Resend in {otpCountdown}s</span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setOtpCountdown(60);
+                              setBkashError(null);
+                            }}
+                            className="underline hover:text-pink-900"
+                          >
+                            Resend OTP
+                          </button>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setBkashStep(1);
+                            setBkashError(null);
+                          }}
+                          className="py-2 border border-pink-300 text-pink-700 hover:bg-pink-100/50 font-bold text-xs rounded-xl transition-colors"
+                        >
+                          Back
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (bkashOtp.length !== 6) {
+                              setBkashError('Please enter the 6-digit OTP code.');
+                              return;
+                            }
+                            setBkashStep(3);
+                            setBkashError(null);
+                          }}
+                          className="py-2 bg-pink-600 hover:bg-pink-700 text-white font-bold text-xs rounded-xl shadow-md shadow-[#E2136E]/10 transition-colors"
+                        >
+                          Verify OTP
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                  <p className="text-[10px] text-pink-700">
-                    ⚡ Simulating direct auto-verification via QuickBite payment processor.
-                  </p>
+                  )}
+
+                  {bkashStep === 3 && (
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-[10px] uppercase font-bold text-slate-700 mb-1">
+                          bKash Wallet PIN
+                        </label>
+                        <input
+                          type="password"
+                          maxLength={5}
+                          placeholder="•••••"
+                          value={bkashPin}
+                          onChange={(e) => {
+                            setBkashPin(e.target.value.replace(/\D/g, ''));
+                            setBkashError(null);
+                          }}
+                          className="w-full px-4 py-2 rounded-xl bg-white border border-pink-300 text-xs font-mono font-bold tracking-[0.6em] text-center text-slate-800 focus:outline-none focus:border-pink-500"
+                        />
+                        {bkashError && <p className="text-[10px] text-red-600 font-bold mt-1">{bkashError}</p>}
+                      </div>
+                      <p className="text-[10px] text-pink-700 font-medium">
+                        🛡️ Encrypted secure transaction. Now click <b>Place Order</b> on the right to complete payment.
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setBkashStep(2);
+                            setBkashError(null);
+                          }}
+                          className="py-2 border border-pink-300 text-pink-700 hover:bg-pink-100/50 font-bold text-xs rounded-xl transition-colors"
+                        >
+                          Back
+                        </button>
+                        <div className="py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1 shadow-md shadow-emerald-500/10 cursor-default">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                          Ready to Pay
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
               {/* Card Simulation Box */}
               {paymentMethod === 'CARD' && (
-                <div className="p-4 rounded-2xl bg-slate-900 text-white space-y-3 shadow-lg">
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="font-bold tracking-wider">QuickBite FastPay</span>
-                    <span className="text-[10px] bg-brand-500 px-2 py-0.5 rounded font-black">TEST MODE</span>
+                <div className="p-4 rounded-2xl bg-slate-900 text-white space-y-4 shadow-lg">
+                  <div className="flex justify-between items-center text-xs border-b border-slate-800 pb-2">
+                    <span className="font-bold tracking-wider flex items-center gap-1.5">
+                      <CreditCard className="w-3.5 h-3.5 text-brand-400" />
+                      QuickBite Secured CardPay
+                    </span>
+                    <span className="text-[9px] bg-brand-500 px-2 py-0.5 rounded font-black uppercase tracking-wider">
+                      Step {cardStep} of 3
+                    </span>
                   </div>
-                  <div>
-                    <label className="block text-[10px] text-slate-400 uppercase font-semibold">Card Number</label>
-                    <input
-                      type="text"
-                      value={cardNumber}
-                      onChange={(e) => setCardNumber(e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs font-mono text-white mt-1"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-[10px] text-slate-400 uppercase font-semibold">Expiry</label>
-                      <input
-                        type="text"
-                        value={cardExpiry}
-                        onChange={(e) => setCardExpiry(e.target.value)}
-                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs font-mono text-white mt-1"
-                      />
+
+                  {cardError && (
+                    <div className="p-2.5 rounded-xl bg-red-950 border border-red-800 text-red-200 text-[10px] font-bold animate-in fade-in duration-200">
+                      {cardError}
                     </div>
-                    <div>
-                      <label className="block text-[10px] text-slate-400 uppercase font-semibold">CVC / CVV</label>
-                      <input
-                        type="password"
-                        value={cardCvc}
-                        onChange={(e) => setCardCvc(e.target.value)}
-                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs font-mono text-white mt-1"
-                      />
+                  )}
+
+                  {cardStep === 1 && (
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-[10px] text-slate-400 uppercase font-semibold">Cardholder Name</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. John Doe"
+                          value={cardHolder}
+                          onChange={(e) => {
+                            setCardHolder(e.target.value);
+                            setCardError(null);
+                          }}
+                          className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs font-semibold text-white mt-1 focus:outline-none focus:border-brand-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-slate-400 uppercase font-semibold">Card Number</label>
+                        <input
+                          type="text"
+                          maxLength={19}
+                          placeholder="4242 4242 4242 4242"
+                          value={cardNumberInput}
+                          onChange={(e) => {
+                            let val = e.target.value.replace(/\D/g, '');
+                            if (val.length > 16) val = val.slice(0, 16);
+                            const formatted = val.match(/.{1,4}/g)?.join(' ') || val;
+                            setCardNumberInput(formatted);
+                            setCardError(null);
+                          }}
+                          className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-white mt-1 focus:outline-none focus:border-brand-500"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[10px] text-slate-400 uppercase font-semibold">Expiry Date</label>
+                          <input
+                            type="text"
+                            maxLength={5}
+                            placeholder="MM/YY"
+                            value={cardExpiryInput}
+                            onChange={(e) => {
+                              let val = e.target.value.replace(/\D/g, '');
+                              if (val.length > 4) val = val.slice(0, 4);
+                              if (val.length > 2) {
+                                val = val.slice(0, 2) + '/' + val.slice(2);
+                              }
+                              setCardExpiryInput(val);
+                              setCardError(null);
+                            }}
+                            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-white mt-1 focus:outline-none focus:border-brand-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] text-slate-400 uppercase font-semibold">CVV / CVC</label>
+                          <input
+                            type="password"
+                            maxLength={3}
+                            placeholder="•••"
+                            value={cardCvcInput}
+                            onChange={(e) => {
+                              setCardCvcInput(e.target.value.replace(/\D/g, ''));
+                              setCardError(null);
+                            }}
+                            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-white mt-1 tracking-widest focus:outline-none focus:border-brand-500"
+                          />
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!cardHolder.trim()) {
+                            setCardError('Please enter the Cardholder Name.');
+                            return;
+                          }
+                          const cleanNum = cardNumberInput.replace(/\s/g, '');
+                          if (cleanNum.length !== 16) {
+                            setCardError('Please enter a valid 16-digit card number.');
+                            return;
+                          }
+                          if (cardExpiryInput.length !== 5 || !cardExpiryInput.includes('/')) {
+                            setCardError('Please enter expiry in MM/YY format.');
+                            return;
+                          }
+                          const parts = cardExpiryInput.split('/');
+                          const mm = parseInt(parts[0], 10);
+                          if (mm < 1 || mm > 12) {
+                            setCardError('Please enter a valid month (01-12).');
+                            return;
+                          }
+                          setCardStep(2);
+                          setCardOtpCountdown(60);
+                          setCardError(null);
+                        }}
+                        className="w-full py-2 bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs rounded-xl shadow-md transition-colors mt-2"
+                      >
+                        Proceed to Secure Checkout
+                      </button>
                     </div>
-                  </div>
+                  )}
+
+                  {cardStep === 2 && (
+                    <div className="space-y-3 text-slate-350">
+                      <div className="p-3 bg-slate-800/80 rounded-xl border border-slate-700/60 text-slate-300 space-y-1">
+                        <p className="text-[10px] uppercase font-bold text-brand-400">3D Secure Verification</p>
+                        <p className="text-xs font-medium leading-relaxed">
+                          A one-time password (OTP) was sent to your bank-registered mobile number ending in **89.
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-slate-400 uppercase font-semibold">Enter OTP Code</label>
+                        <input
+                          type="text"
+                          maxLength={6}
+                          placeholder="6-digit bank OTP (e.g. 123456)"
+                          value={cardOtp}
+                          onChange={(e) => {
+                            setCardOtp(e.target.value.replace(/\D/g, ''));
+                            setCardError(null);
+                          }}
+                          className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-white mt-1 text-center tracking-widest focus:outline-none focus:border-brand-500"
+                        />
+                      </div>
+                      <div className="flex justify-between items-center text-[10px] text-slate-400 font-bold">
+                        <span>Didn't receive the OTP?</span>
+                        {cardOtpCountdown > 0 ? (
+                          <span>Resend in {cardOtpCountdown}s</span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCardOtpCountdown(60);
+                              setCardError(null);
+                            }}
+                            className="text-brand-400 underline hover:text-brand-300"
+                          >
+                            Resend OTP
+                          </button>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-2 gap-2.5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCardStep(1);
+                            setCardError(null);
+                          }}
+                          className="py-2 bg-slate-850 hover:bg-slate-800 text-slate-300 border border-slate-700 font-bold text-xs rounded-xl transition-colors"
+                        >
+                          Back
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (cardOtp.length !== 6) {
+                              setCardError('Please enter the 6-digit bank OTP code.');
+                              return;
+                            }
+                            setCardStep(3);
+                            setCardError(null);
+                          }}
+                          className="py-2 bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs rounded-xl transition-colors"
+                        >
+                          Verify & Authorize
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {cardStep === 3 && (
+                    <div className="space-y-3">
+                      <div className="p-3 bg-emerald-950/40 border border-emerald-800/80 rounded-xl text-emerald-300 text-xs font-bold flex items-center gap-2">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                        <div>
+                          <p>Card Authorized Successfully!</p>
+                          <p className="text-[10px] text-emerald-400/90 font-medium mt-0.5 leading-relaxed">
+                            Details verified. Click "Place Order" on the right to finalize your purchase.
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex justify-start">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCardStep(2);
+                            setCardError(null);
+                          }}
+                          className="py-1.5 px-3 bg-slate-850 hover:bg-slate-800 text-slate-400 border border-slate-700 text-[10px] font-bold rounded-lg transition-colors"
+                        >
+                          Change Authorization
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

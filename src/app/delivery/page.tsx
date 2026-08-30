@@ -22,6 +22,28 @@ export default function DeliveryPartnerPortal() {
   const { currentUser } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deliveryTab, setDeliveryTab] = useState<'MY_RUNS' | 'AVAILABLE_JOBS'>('MY_RUNS');
+
+  const handleRequestDelivery = async (orderId: string) => {
+    try {
+      const res = await fetch(`/api/orders/${orderId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          requestedDeliveryPersonId: currentUser?.id,
+          requestedDeliveryPersonName: currentUser?.name,
+          requestedDeliveryPersonPhone: currentUser?.phone,
+          deliveryRequestStatus: 'PENDING'
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setOrders(orders.map(o => (o.id === orderId ? data.data : o)));
+      }
+    } catch (e) {
+      console.error('Failed to request delivery assignment', e);
+    }
+  };
 
   const fetchOrders = async () => {
     try {
@@ -75,11 +97,15 @@ export default function DeliveryPartnerPortal() {
     );
   }
 
-  const assignedDeliveries = orders.filter(
-    o => o.deliveryPersonId === currentUser.id || ['PREPARING', 'READY_FOR_PICKUP', 'OUT_FOR_DELIVERY'].includes(o.status)
+  const myRuns = orders.filter(
+    o => o.deliveryPersonId === currentUser.id && ['ACCEPTED', 'PREPARING', 'READY_FOR_PICKUP', 'OUT_FOR_DELIVERY'].includes(o.status)
   );
 
-  const completedCount = orders.filter(o => o.status === 'DELIVERED').length;
+  const availableJobs = orders.filter(
+    o => !o.deliveryPersonId && ['ACCEPTED', 'PREPARING', 'READY_FOR_PICKUP'].includes(o.status)
+  );
+
+  const completedCount = orders.filter(o => o.deliveryPersonId === currentUser.id && o.status === 'DELIVERED').length;
   const estimatedEarnings = completedCount * 50; // 50 BDT per delivery payout
 
   return (
@@ -124,7 +150,7 @@ export default function DeliveryPartnerPortal() {
           </div>
           <div>
             <p className="text-xs text-slate-500 font-semibold">Active Dispatch Tasks</p>
-            <p className="text-2xl font-black text-slate-900">{assignedDeliveries.length}</p>
+            <p className="text-2xl font-black text-slate-900">{myRuns.length}</p>
           </div>
         </div>
 
@@ -150,21 +176,50 @@ export default function DeliveryPartnerPortal() {
       </div>
 
       {/* Deliveries List */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-black text-slate-900">Current Assigned & Available Runs</h2>
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-3">
+          <h2 className="text-xl font-black text-slate-900">Delivery Dispatch Board</h2>
+          
+          <div className="flex gap-2 bg-slate-100 p-1 rounded-2xl">
+            <button
+              onClick={() => setDeliveryTab('MY_RUNS')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                deliveryTab === 'MY_RUNS'
+                  ? 'bg-white text-slate-950 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              My Runs ({myRuns.length})
+            </button>
+            <button
+              onClick={() => setDeliveryTab('AVAILABLE_JOBS')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                deliveryTab === 'AVAILABLE_JOBS'
+                  ? 'bg-white text-slate-950 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Available Jobs ({availableJobs.length})
+            </button>
+          </div>
+        </div>
 
         {loading ? (
           <div className="py-16 text-center">
             <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
             <p className="text-xs text-slate-500 font-bold">Checking dispatch queue...</p>
           </div>
-        ) : assignedDeliveries.length === 0 ? (
+        ) : (deliveryTab === 'MY_RUNS' ? myRuns : availableJobs).length === 0 ? (
           <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center">
-            <p className="text-sm font-bold text-slate-600">No active delivery tasks at the moment.</p>
+            <p className="text-sm font-bold text-slate-600">
+              {deliveryTab === 'MY_RUNS' 
+                ? 'You have no active runs. Request jobs in the "Available Jobs" tab!'
+                : 'No available delivery jobs at the moment.'}
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {assignedDeliveries.map(order => (
+            {(deliveryTab === 'MY_RUNS' ? myRuns : availableJobs).map(order => (
               <div
                 key={order.id}
                 className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4 flex flex-col justify-between"
@@ -227,28 +282,53 @@ export default function DeliveryPartnerPortal() {
                   </Link>
 
                   <div className="flex items-center gap-2">
-                    {order.status === 'PREPARING' && (
-                      <button
-                        onClick={() => handleUpdateDelivery(order.id, 'OUT_FOR_DELIVERY')}
-                        className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-blue-500/20"
-                      >
-                        <Bike className="w-3.5 h-3.5" /> Pick Up & Start Transit
-                      </button>
-                    )}
+                    {deliveryTab === 'MY_RUNS' ? (
+                      <>
+                        {order.status === 'ACCEPTED' && (
+                          <span className="text-xs font-semibold text-slate-500 bg-slate-50 px-3 py-1 rounded-lg">
+                            ⏱ Preparing in Kitchen
+                          </span>
+                        )}
 
-                    {order.status === 'OUT_FOR_DELIVERY' && (
-                      <button
-                        onClick={() => handleUpdateDelivery(order.id, 'DELIVERED')}
-                        className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-emerald-500/20"
-                      >
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Confirm Delivery Handover
-                      </button>
-                    )}
+                        {(order.status === 'PREPARING' || order.status === 'READY_FOR_PICKUP') && (
+                          <button
+                            onClick={() => handleUpdateDelivery(order.id, 'OUT_FOR_DELIVERY')}
+                            className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-blue-500/20 transition-all hover:scale-105 active:scale-95"
+                          >
+                            <Bike className="w-3.5 h-3.5" /> Pick Up & Start Transit
+                          </button>
+                        )}
 
-                    {order.status === 'DELIVERED' && (
-                      <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-lg">
-                        ✓ Delivery Handover Complete
-                      </span>
+                        {order.status === 'OUT_FOR_DELIVERY' && (
+                          <button
+                            onClick={() => handleUpdateDelivery(order.id, 'DELIVERED')}
+                            className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-emerald-500/20 transition-all hover:scale-105 active:scale-95"
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5" /> Confirm Delivery Handover
+                          </button>
+                        )}
+
+                        {order.status === 'DELIVERED' && (
+                          <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-lg">
+                            ✓ Delivery Handover Complete
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        {order.requestedDeliveryPersonId === currentUser.id && order.deliveryRequestStatus === 'PENDING' ? (
+                          <span className="text-xs font-black text-brand-700 bg-brand-50 border border-brand-200 px-3 py-1.5 rounded-lg animate-pulse">
+                            ⏱ Pending Approval
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => handleRequestDelivery(order.id)}
+                            className="px-4 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-brand-500/20 transition-all hover:scale-105 active:scale-95"
+                          >
+                            Request Assignment
+                          </button>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>

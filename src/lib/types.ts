@@ -143,6 +143,10 @@ export interface Order {
   updatedAt: string;
   
   feedback?: Feedback;
+  requestedDeliveryPersonId?: string | null;
+  requestedDeliveryPersonName?: string | null;
+  requestedDeliveryPersonPhone?: string | null;
+  deliveryRequestStatus?: 'PENDING' | 'APPROVED' | 'DENIED' | null;
 }
 
 export interface CartItem {

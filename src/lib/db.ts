@@ -298,6 +298,21 @@ class PersistentStore {
     return null;
   }
 
+  updateOrder(id: string, updates: Partial<Order>): Order | null {
+    this.loadFromDisk();
+    const idx = this.data.orders.findIndex(o => o.id === id || o.orderNumber === id);
+    if (idx !== -1) {
+      this.data.orders[idx] = { 
+        ...this.data.orders[idx], 
+        ...updates, 
+        updatedAt: new Date().toISOString() 
+      };
+      this.saveToDisk();
+      return this.data.orders[idx];
+    }
+    return null;
+  }
+
   // --- Feedback Operations ---
   getFeedbacks(restaurantId?: string): Feedback[] {
     this.loadFromDisk();

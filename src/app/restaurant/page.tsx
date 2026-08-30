@@ -98,6 +98,37 @@ export default function RestaurantManagerPortal() {
     }
   };
 
+  const handleRiderRequest = async (orderId: string, accept: boolean) => {
+    try {
+      const order = orders.find(o => o.id === orderId);
+      if (!order) return;
+
+      const body = accept ? {
+        deliveryPersonId: order.requestedDeliveryPersonId,
+        deliveryPersonName: order.requestedDeliveryPersonName,
+        deliveryPersonPhone: order.requestedDeliveryPersonPhone,
+        deliveryRequestStatus: 'APPROVED' as const
+      } : {
+        requestedDeliveryPersonId: null,
+        requestedDeliveryPersonName: null,
+        requestedDeliveryPersonPhone: null,
+        deliveryRequestStatus: 'DENIED' as const
+      };
+
+      const res = await fetch(`/api/orders/${orderId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setOrders(orders.map(o => (o.id === orderId ? data.data : o)));
+      }
+    } catch (e) {
+      console.error('Failed to handle rider request', e);
+    }
+  };
+
   // Toggle food availability
   const handleToggleAvailability = async (item: FoodItem) => {
     try {
@@ -299,6 +330,43 @@ export default function RestaurantManagerPortal() {
                       <p className="text-[11px] bg-amber-50 text-amber-800 p-2.5 rounded-xl border border-amber-200">
                         <strong>Kitchen Note:</strong> {order.notes}
                       </p>
+                    )}
+
+                    {order.deliveryRequestStatus === 'PENDING' && (
+                      <div className="mt-3 p-3 bg-blue-50 border border-blue-100 rounded-2xl space-y-2">
+                        <p className="text-xs font-semibold text-blue-800 flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse shrink-0"></span>
+                          Rider Assignment Request
+                        </p>
+                        <p className="text-[11px] text-blue-700">
+                          Rider: <strong>{order.requestedDeliveryPersonName}</strong> ({order.requestedDeliveryPersonPhone})
+                        </p>
+                        <div className="flex gap-2 pt-1">
+                          <button
+                            type="button"
+                            onClick={() => handleRiderRequest(order.id, true)}
+                            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10px] font-bold shadow-sm transition-colors"
+                          >
+                            Accept Rider
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleRiderRequest(order.id, false)}
+                            className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[10px] font-bold shadow-sm transition-colors"
+                          >
+                            Deny Rider
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {order.deliveryPersonId && (
+                      <div className="mt-3 p-2.5 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                        <p className="text-[11px] text-emerald-800 font-medium">
+                          Assigned Rider: <strong>{order.deliveryPersonName}</strong> ({order.deliveryPersonPhone})
+                        </p>
+                      </div>
                     )}
                   </div>
 

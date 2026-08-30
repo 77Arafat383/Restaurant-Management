@@ -22,16 +22,7 @@ export async function PATCH(
 ) {
   try {
     const body = await req.json();
-    const updated = localStore.updateOrderStatus(
-      params.id,
-      body.status,
-      {
-        deliveryPersonId: body.deliveryPersonId,
-        deliveryPersonName: body.deliveryPersonName,
-        deliveryPersonPhone: body.deliveryPersonPhone,
-        paymentStatus: body.paymentStatus,
-      }
-    );
+    const updated = localStore.updateOrder(params.id, body);
 
     if (!updated) {
       return NextResponse.json({ success: false, error: 'Order not found' }, { status: 404 });

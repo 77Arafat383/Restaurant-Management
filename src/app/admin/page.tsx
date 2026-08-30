@@ -4,17 +4,17 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { User, Restaurant, Order, Feedback } from '@/lib/types';
 import { formatPrice, formatDate } from '@/lib/utils';
-import { 
-  ShieldCheck, 
-  Users, 
-  Store, 
-  DollarSign, 
-  TrendingUp, 
-  CheckCircle2, 
-  XCircle, 
-  Star, 
-  RefreshCw, 
-  FileText, 
+import {
+  ShieldCheck,
+  Users,
+  Store,
+  DollarSign,
+  TrendingUp,
+  CheckCircle2,
+  XCircle,
+  Star,
+  RefreshCw,
+  FileText,
   Search,
   Activity,
   Trash2
@@ -23,7 +23,7 @@ import {
 export default function AdminConsolePage() {
   const { currentUser } = useAuth();
   const [activeSection, setActiveSection] = useState<'OVERVIEW' | 'USERS' | 'RESTAURANTS' | 'ORDERS' | 'FEEDBACK'>('OVERVIEW');
-  
+
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalRestaurants: 0,
@@ -178,7 +178,7 @@ export default function AdminConsolePage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 pb-20">
-      
+
       {/* Admin Title Banner */}
       <div className="bg-gradient-to-r from-purple-950 via-slate-900 to-slate-950 text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
@@ -190,7 +190,6 @@ export default function AdminConsolePage() {
               <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-400/30">
                 System Administration Console
               </span>
-              <span className="text-xs text-slate-400">NSTU SE Lab Supervisor View</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-white mt-1">QuickBite Control Center</h1>
             <p className="text-xs text-slate-400">Logged in as: {currentUser?.name || 'Administrator'} ({currentUser?.email || 'admin@quickbite.com'})</p>
@@ -266,11 +265,10 @@ export default function AdminConsolePage() {
           <button
             key={tab.id}
             onClick={() => setActiveSection(tab.id as typeof activeSection)}
-            className={`px-5 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-              activeSection === tab.id
+            className={`px-5 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${activeSection === tab.id
                 ? 'bg-slate-900 text-white shadow-sm'
                 : 'text-slate-600 hover:bg-slate-100'
-            }`}
+              }`}
           >
             {tab.label}
           </button>
@@ -285,7 +283,7 @@ export default function AdminConsolePage() {
               <h3 className="text-base font-black text-slate-900">Recent Payment Transactions & Orders</h3>
               <p className="text-xs text-slate-500">Live order audit log from PostgreSQL</p>
             </div>
-            
+
             <div className="relative w-full sm:w-72 shrink-0">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
@@ -297,7 +295,7 @@ export default function AdminConsolePage() {
               />
             </div>
           </div>
- 
+
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-100">
@@ -343,7 +341,7 @@ export default function AdminConsolePage() {
               <h3 className="text-base font-black text-slate-900">Platform Users & Roles</h3>
               <p className="text-xs text-slate-500">Access control according to system design specifications</p>
             </div>
-            
+
             <div className="relative w-full sm:w-72 shrink-0">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
@@ -355,7 +353,7 @@ export default function AdminConsolePage() {
               />
             </div>
           </div>
- 
+
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-100">
@@ -375,15 +373,14 @@ export default function AdminConsolePage() {
                     <td className="p-4 font-mono text-slate-600">{u.email}</td>
                     <td className="p-4">
                       <span
-                        className={`px-2.5 py-1 rounded-full font-bold text-[10px] ${
-                          u.role === 'ADMIN'
+                        className={`px-2.5 py-1 rounded-full font-bold text-[10px] ${u.role === 'ADMIN'
                             ? 'bg-purple-100 text-purple-700'
                             : u.role === 'RESTAURANT_MANAGER'
-                            ? 'bg-amber-100 text-amber-700'
-                            : u.role === 'DELIVERY_PERSON'
-                            ? 'bg-blue-100 text-blue-700'
-                            : 'bg-emerald-100 text-emerald-700'
-                        }`}
+                              ? 'bg-amber-100 text-amber-700'
+                              : u.role === 'DELIVERY_PERSON'
+                                ? 'bg-blue-100 text-blue-700'
+                                : 'bg-emerald-100 text-emerald-700'
+                          }`}
                       >
                         {u.role.replace('_', ' ')}
                       </span>
@@ -433,7 +430,7 @@ export default function AdminConsolePage() {
               <h3 className="text-base font-black text-slate-900">Partner Kitchen Verification</h3>
               <p className="text-xs text-slate-500">Approve or suspend merchant restaurant accounts</p>
             </div>
-            
+
             <div className="relative w-full sm:w-72 shrink-0">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
@@ -445,7 +442,7 @@ export default function AdminConsolePage() {
               />
             </div>
           </div>
- 
+
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-100">
@@ -471,11 +468,10 @@ export default function AdminConsolePage() {
                     <td className="p-4 text-center">
                       <button
                         onClick={() => handleToggleApproval(r.id)}
-                        className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-all ${
-                          r.isApproved
+                        className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-all ${r.isApproved
                             ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
                             : 'bg-red-100 text-red-700 hover:bg-red-200'
-                        }`}
+                          }`}
                       >
                         {r.isApproved ? 'Approved ✓' : 'Suspended ✗'}
                       </button>
@@ -514,7 +510,7 @@ export default function AdminConsolePage() {
                 </div>
                 <p className="text-xs text-slate-600 italic">&ldquo;{fb.comment}&rdquo;</p>
                 <p className="text-[10px] text-brand-600 font-semibold">{fb.restaurantName} • {formatDate(fb.createdAt)}</p>
-                
+
                 <button
                   onClick={() => handleDeleteFeedback(fb.id)}
                   className="absolute top-2 right-2 p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all"

@@ -332,6 +332,40 @@ class PersistentStore {
     this.saveToDisk();
     return newFeedback;
   }
+
+  deleteUser(id: string): User | null {
+    this.loadFromDisk();
+    const idx = this.data.users.findIndex(u => u.id === id);
+    if (idx !== -1) {
+      const deleted = this.data.users.splice(idx, 1)[0];
+      this.saveToDisk();
+      return deleted;
+    }
+    return null;
+  }
+
+  deleteRestaurant(id: string): Restaurant | null {
+    this.loadFromDisk();
+    const idx = this.data.restaurants.findIndex(r => r.id === id);
+    if (idx !== -1) {
+      const deleted = this.data.restaurants.splice(idx, 1)[0];
+      this.data.foodItems = this.data.foodItems.filter(f => f.restaurantId !== id);
+      this.saveToDisk();
+      return deleted;
+    }
+    return null;
+  }
+
+  deleteFeedback(id: string): Feedback | null {
+    this.loadFromDisk();
+    const idx = this.data.feedbacks.findIndex(f => f.id === id);
+    if (idx !== -1) {
+      const deleted = this.data.feedbacks.splice(idx, 1)[0];
+      this.saveToDisk();
+      return deleted;
+    }
+    return null;
+  }
 }
 
 export const db = new PersistentStore();

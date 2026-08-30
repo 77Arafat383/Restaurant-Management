@@ -33,3 +33,24 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ success: false, error: error.message || 'Failed to update user approval.' }, { status: 500 });
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'User ID is required.' }, { status: 400 });
+    }
+
+    const deleted = db.deleteUser(id);
+    if (!deleted) {
+      return NextResponse.json({ success: false, error: 'User not found.' }, { status: 404 });
+    }
+
+    const { password: _, ...safeUser } = deleted;
+    return NextResponse.json({ success: true, data: safeUser });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message || 'Failed to delete user.' }, { status: 500 });
+  }
+}

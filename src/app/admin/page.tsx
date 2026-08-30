@@ -16,7 +16,8 @@ import {
   RefreshCw, 
   FileText, 
   Search,
-  Activity
+  Activity,
+  Trash2
 } from 'lucide-react';
 
 export default function AdminConsolePage() {
@@ -37,6 +38,11 @@ export default function AdminConsolePage() {
   const [recentOrders, setRecentOrders] = useState<Order[]>([]);
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Search States
+  const [searchTransactions, setSearchTransactions] = useState('');
+  const [searchUsers, setSearchUsers] = useState('');
+  const [searchRestaurants, setSearchRestaurants] = useState('');
 
   const fetchAdminData = async () => {
     try {
@@ -82,6 +88,93 @@ export default function AdminConsolePage() {
       console.error('Failed to approve user', e);
     }
   };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm('Are you sure you want to delete this user account? This cannot be undone.')) return;
+    try {
+      const res = await fetch(`/api/auth/users?id=${userId}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (data.success) {
+        setUsers(prev => prev.filter(u => u.id !== userId));
+        fetchAdminData();
+      } else {
+        alert(data.error || 'Failed to delete user');
+      }
+    } catch (e) {
+      console.error('Error deleting user:', e);
+      alert('Failed to delete user');
+    }
+  };
+
+  const handleDeleteRestaurant = async (restId: string) => {
+    if (!confirm('Are you sure you want to delete this restaurant and all its menu items? This cannot be undone.')) return;
+    try {
+      const res = await fetch(`/api/restaurants?id=${restId}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (data.success) {
+        setRestaurants(prev => prev.filter(r => r.id !== restId));
+        fetchAdminData();
+      } else {
+        alert(data.error || 'Failed to delete restaurant');
+      }
+    } catch (e) {
+      console.error('Error deleting restaurant:', e);
+      alert('Failed to delete restaurant');
+    }
+  };
+
+  const handleDeleteFeedback = async (fbId: string) => {
+    if (!confirm('Are you sure you want to delete this customer feedback? This cannot be undone.')) return;
+    try {
+      const res = await fetch(`/api/feedback?id=${fbId}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (data.success) {
+        setFeedbacks(prev => prev.filter(f => f.id !== fbId));
+        fetchAdminData();
+      } else {
+        alert(data.error || 'Failed to delete feedback');
+      }
+    } catch (e) {
+      console.error('Error deleting feedback:', e);
+      alert('Failed to delete feedback');
+    }
+  };
+
+  const filteredOrders = recentOrders.filter(o => {
+    const query = searchTransactions.toLowerCase().trim();
+    if (!query) return true;
+    return (
+      o.orderNumber.toLowerCase().includes(query) ||
+      o.customerName.toLowerCase().includes(query) ||
+      o.restaurantName.toLowerCase().includes(query)
+    );
+  });
+
+  const filteredUsers = users.filter(u => {
+    const query = searchUsers.toLowerCase().trim();
+    if (!query) return true;
+    return (
+      u.name.toLowerCase().includes(query) ||
+      u.email.toLowerCase().includes(query) ||
+      u.role.toLowerCase().includes(query)
+    );
+  });
+
+  const filteredRestaurantsList = restaurants.filter(r => {
+    const query = searchRestaurants.toLowerCase().trim();
+    if (!query) return true;
+    return (
+      r.name.toLowerCase().includes(query) ||
+      r.cuisine.toLowerCase().includes(query) ||
+      r.address.toLowerCase().includes(query)
+    );
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 pb-20">
@@ -187,13 +280,24 @@ export default function AdminConsolePage() {
       {/* SECTION 1: Transactions Overview */}
       {activeSection === 'OVERVIEW' && (
         <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+          <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h3 className="text-base font-black text-slate-900">Recent Payment Transactions & Orders</h3>
               <p className="text-xs text-slate-500">Live order audit log from PostgreSQL</p>
             </div>
+            
+            <div className="relative w-full sm:w-72 shrink-0">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchTransactions}
+                onChange={(e) => setSearchTransactions(e.target.value)}
+                placeholder="Search orders, customers, kitchens..."
+                className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-800 transition-all"
+              />
+            </div>
           </div>
-
+ 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-100">
@@ -208,7 +312,7 @@ export default function AdminConsolePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
-                {recentOrders.map(o => (
+                {filteredOrders.map(o => (
                   <tr key={o.id} className="hover:bg-slate-50/80">
                     <td className="p-4 pl-6 font-mono font-bold text-slate-900">#{o.orderNumber}</td>
                     <td className="p-4 font-bold">{o.customerName}</td>
@@ -231,16 +335,27 @@ export default function AdminConsolePage() {
             </table>
           </div>
         </div>
-      )}
-
-      {/* SECTION 2: User Directory */}
+      )}        {/* SECTION 2: User Directory */}
       {activeSection === 'USERS' && (
         <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-slate-100">
-            <h3 className="text-base font-black text-slate-900">Platform Users & Roles</h3>
-            <p className="text-xs text-slate-500">Access control according to system design specifications</p>
+          <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="text-base font-black text-slate-900">Platform Users & Roles</h3>
+              <p className="text-xs text-slate-500">Access control according to system design specifications</p>
+            </div>
+            
+            <div className="relative w-full sm:w-72 shrink-0">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchUsers}
+                onChange={(e) => setSearchUsers(e.target.value)}
+                placeholder="Search users by name, email, role..."
+                className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-800 transition-all"
+              />
+            </div>
           </div>
-
+ 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-100">
@@ -249,11 +364,12 @@ export default function AdminConsolePage() {
                   <th className="p-4">Email</th>
                   <th className="p-4">Role</th>
                   <th className="p-4">Phone</th>
-                  <th className="p-4 pr-6 text-right">Status</th>
+                  <th className="p-4 text-center">Status</th>
+                  <th className="p-4 pr-6 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
-                {users.map(u => (
+                {filteredUsers.map(u => (
                   <tr key={u.id} className="hover:bg-slate-50/80">
                     <td className="p-4 pl-6 font-bold text-slate-900">{u.name}</td>
                     <td className="p-4 font-mono text-slate-600">{u.email}</td>
@@ -273,9 +389,9 @@ export default function AdminConsolePage() {
                       </span>
                     </td>
                     <td className="p-4">{u.phone || 'N/A'}</td>
-                    <td className="p-4 pr-6 text-right">
+                    <td className="p-4 text-center">
                       {u.isApproved === false ? (
-                        <div className="flex items-center justify-end gap-2.5">
+                        <div className="flex items-center justify-center gap-2.5">
                           <span className="inline-flex items-center gap-1 text-amber-600 font-bold bg-amber-50 border border-amber-200/50 px-2 py-0.5 rounded text-[10px]">
                             Pending
                           </span>
@@ -287,9 +403,20 @@ export default function AdminConsolePage() {
                           </button>
                         </div>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-emerald-600 font-bold bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-emerald-600 font-bold bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full animate-fadeIn">
                           <CheckCircle2 className="w-3.5 h-3.5" /> Approved
                         </span>
+                      )}
+                    </td>
+                    <td className="p-4 pr-6 text-right">
+                      {currentUser?.id !== u.id && (
+                        <button
+                          onClick={() => handleDeleteUser(u.id)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                          title="Delete user"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       )}
                     </td>
                   </tr>
@@ -298,16 +425,27 @@ export default function AdminConsolePage() {
             </table>
           </div>
         </div>
-      )}
-
-      {/* SECTION 3: Restaurant Approvals */}
+      )}        {/* SECTION 3: Restaurant Approvals */}
       {activeSection === 'RESTAURANTS' && (
         <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-slate-100">
-            <h3 className="text-base font-black text-slate-900">Partner Kitchen Verification</h3>
-            <p className="text-xs text-slate-500">Approve or suspend merchant restaurant accounts</p>
+          <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="text-base font-black text-slate-900">Partner Kitchen Verification</h3>
+              <p className="text-xs text-slate-500">Approve or suspend merchant restaurant accounts</p>
+            </div>
+            
+            <div className="relative w-full sm:w-72 shrink-0">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchRestaurants}
+                onChange={(e) => setSearchRestaurants(e.target.value)}
+                placeholder="Search restaurants by name, cuisine, address..."
+                className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-800 transition-all"
+              />
+            </div>
           </div>
-
+ 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-100">
@@ -316,11 +454,12 @@ export default function AdminConsolePage() {
                   <th className="p-4">Cuisine</th>
                   <th className="p-4">Rating</th>
                   <th className="p-4">Contact</th>
-                  <th className="p-4 pr-6 text-right">Approval Status</th>
+                  <th className="p-4 text-center">Approval Status</th>
+                  <th className="p-4 pr-6 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
-                {restaurants.map(r => (
+                {filteredRestaurantsList.map(r => (
                   <tr key={r.id} className="hover:bg-slate-50/80">
                     <td className="p-4 pl-6">
                       <p className="font-bold text-slate-900">{r.name}</p>
@@ -329,7 +468,7 @@ export default function AdminConsolePage() {
                     <td className="p-4">{r.cuisine}</td>
                     <td className="p-4 font-bold text-amber-600">★ {r.rating} ({r.ratingCount})</td>
                     <td className="p-4">{r.phone}</td>
-                    <td className="p-4 pr-6 text-right">
+                    <td className="p-4 text-center">
                       <button
                         onClick={() => handleToggleApproval(r.id)}
                         className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-all ${
@@ -339,6 +478,15 @@ export default function AdminConsolePage() {
                         }`}
                       >
                         {r.isApproved ? 'Approved ✓' : 'Suspended ✗'}
+                      </button>
+                    </td>
+                    <td className="p-4 pr-6 text-right">
+                      <button
+                        onClick={() => handleDeleteRestaurant(r.id)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                        title="Delete restaurant"
+                      >
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </td>
                   </tr>
@@ -355,10 +503,10 @@ export default function AdminConsolePage() {
           <h3 className="text-base font-black text-slate-900">Customer Reviews & Complaints Audit</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {feedbacks.map(fb => (
-              <div key={fb.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+              <div key={fb.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2 relative group">
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-bold text-slate-900">{fb.customerName}</span>
-                  <div className="flex text-amber-500">
+                  <div className="flex text-amber-500 mr-8">
                     {[...Array(fb.rating)].map((_, i) => (
                       <Star key={i} className="w-3.5 h-3.5 fill-amber-500" />
                     ))}
@@ -366,6 +514,14 @@ export default function AdminConsolePage() {
                 </div>
                 <p className="text-xs text-slate-600 italic">&ldquo;{fb.comment}&rdquo;</p>
                 <p className="text-[10px] text-brand-600 font-semibold">{fb.restaurantName} • {formatDate(fb.createdAt)}</p>
+                
+                <button
+                  onClick={() => handleDeleteFeedback(fb.id)}
+                  className="absolute top-2 right-2 p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all"
+                  title="Delete feedback"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
               </div>
             ))}
           </div>

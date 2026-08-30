@@ -406,7 +406,11 @@ export default function RestaurantManagerPortal() {
                       {order.status === 'PREPARING' && (
                         <button
                           onClick={() => handleUpdateOrderStatus(order.id, 'OUT_FOR_DELIVERY')}
-                          className="px-4 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold flex items-center gap-1"
+                          className={`px-4 py-2 rounded-xl text-white text-xs font-bold flex items-center gap-1 transition-colors ${
+                            order.deliveryPersonId 
+                              ? 'bg-emerald-600 hover:bg-emerald-700' 
+                              : 'bg-brand-500 hover:bg-brand-600'
+                          }`}
                         >
                           <CheckCircle2 className="w-3.5 h-3.5" /> Ready & Handover to Rider
                         </button>

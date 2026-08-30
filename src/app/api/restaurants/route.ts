@@ -38,3 +38,23 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: false, error: 'Failed to create restaurant' }, { status: 500 });
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'Restaurant ID is required.' }, { status: 400 });
+    }
+
+    const deleted = localStore.deleteRestaurant(id);
+    if (!deleted) {
+      return NextResponse.json({ success: false, error: 'Restaurant not found.' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, data: deleted });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message || 'Failed to delete restaurant.' }, { status: 500 });
+  }
+}

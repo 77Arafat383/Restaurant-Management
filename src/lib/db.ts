@@ -287,6 +287,17 @@ class PersistentStore {
     return order;
   }
 
+  deleteOrder(id: string): Order | null {
+    this.loadFromDisk();
+    const idx = this.data.orders.findIndex(o => o.id === id || o.orderNumber === id);
+    if (idx !== -1) {
+      const deleted = this.data.orders.splice(idx, 1)[0];
+      this.saveToDisk();
+      return deleted;
+    }
+    return null;
+  }
+
   // --- Feedback Operations ---
   getFeedbacks(restaurantId?: string): Feedback[] {
     this.loadFromDisk();

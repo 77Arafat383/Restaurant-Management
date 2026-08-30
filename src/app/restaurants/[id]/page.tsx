@@ -115,13 +115,16 @@ export default function RestaurantDetailPage() {
   }, [allFoods]);
 
   // Extract unique categories
-  const categories = ['ALL', ...Array.from(new Set(allFoods.map(f => f.category)))];
+  const categories = ['ALL', ...Array.from(new Set(allFoods.flatMap(f => 
+    f.category ? f.category.split(',').map(c => c.trim()) : []
+  )))];
 
   // Filter foods
   const filteredFoods = allFoods.filter(food => {
     const matchSearch = food.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                         food.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchCat = selectedCategory === 'ALL' || food.category === selectedCategory;
+    const matchCat = selectedCategory === 'ALL' || 
+      (food.category && food.category.split(',').map(c => c.trim().toLowerCase()).includes(selectedCategory.toLowerCase()));
     const matchVeg = filterVegOnly ? food.isVeg : true;
     return matchSearch && matchCat && matchVeg;
   });

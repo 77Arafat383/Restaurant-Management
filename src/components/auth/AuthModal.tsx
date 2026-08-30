@@ -349,22 +349,20 @@ export default function AuthModal() {
                     <button
                       type="button"
                       onClick={() => { setRegType('CUSTOMER'); setRegRole('CUSTOMER'); }}
-                      className={`py-2 text-xs font-bold rounded-lg transition-all ${
-                        regType === 'CUSTOMER'
+                      className={`py-2 text-xs font-bold rounded-lg transition-all ${regType === 'CUSTOMER'
                           ? 'bg-white text-slate-900 shadow-sm'
                           : 'text-slate-500 hover:text-slate-700'
-                      }`}
+                        }`}
                     >
                       🍴 Customer
                     </button>
                     <button
                       type="button"
                       onClick={() => { setRegType('PARTNER'); setRegRole('RESTAURANT_MANAGER'); }}
-                      className={`py-2 text-xs font-bold rounded-lg transition-all ${
-                        regType === 'PARTNER'
+                      className={`py-2 text-xs font-bold rounded-lg transition-all ${regType === 'PARTNER'
                           ? 'bg-white text-slate-900 shadow-sm'
                           : 'text-slate-500 hover:text-slate-700'
-                      }`}
+                        }`}
                     >
                       🏪 Partner
                     </button>
@@ -380,9 +378,9 @@ export default function AuthModal() {
                       onChange={(e) => setRegRole(e.target.value as UserRole)}
                       className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-800 bg-white"
                     >
-                      <option value="RESTAURANT_MANAGER">Kitchen Manager (Restaurant Partner)</option>
-                      <option value="DELIVERY_PERSON">Delivery Rider (Logistics Partner)</option>
-                      <option value="ADMIN">System Administrator (Admin Console)</option>
+                      <option value="RESTAURANT_MANAGER">Kitchen Manager</option>
+                      <option value="DELIVERY_PERSON">Delivery Rider</option>
+                      <option value="ADMIN">System Administrator</option>
                     </select>
                     <p className="text-[10px] text-amber-600 font-bold leading-relaxed">
                       * Note: Partner registrations must be manually approved by the administrator before you can sign in.

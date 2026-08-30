@@ -70,6 +70,50 @@ export default function RestaurantDetailPage() {
     }
   }, [restaurantId]);
 
+  React.useEffect(() => {
+    if (typeof window !== 'undefined' && allFoods.length > 0) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const selectFood = urlParams.get('selectFood');
+      if (selectFood) {
+        const foundItem = allFoods.find(f => f.id === selectFood);
+        if (foundItem) {
+          // Reset filters that could hide the food item
+          setSelectedCategory('ALL');
+          setFilterVegOnly(false);
+
+          // Allow the state update to render the food item first
+          const timer = setTimeout(() => {
+            const element = document.getElementById(`food-${selectFood}`);
+            if (element) {
+              element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              
+              // Apply glowing border and scale animation
+              element.classList.add(
+                'ring-4', 
+                'ring-brand-500/50', 
+                'border-brand-500', 
+                'bg-brand-50/50', 
+                'scale-[1.02]'
+              );
+              
+              // Clean up the classes after animation duration
+              setTimeout(() => {
+                element.classList.remove(
+                  'ring-4', 
+                  'ring-brand-500/50', 
+                  'border-brand-500', 
+                  'bg-brand-50/50', 
+                  'scale-[1.02]'
+                );
+              }, 4000);
+            }
+          }, 300);
+          return () => clearTimeout(timer);
+        }
+      }
+    }
+  }, [allFoods]);
+
   // Extract unique categories
   const categories = ['ALL', ...Array.from(new Set(allFoods.map(f => f.category)))];
 
@@ -250,7 +294,8 @@ export default function RestaurantDetailPage() {
               return (
                 <div
                   key={food.id}
-                  className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex gap-4"
+                  id={`food-${food.id}`}
+                  className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-500 flex gap-4"
                 >
                   <div className="flex-1 flex flex-col justify-between">
                     <div>

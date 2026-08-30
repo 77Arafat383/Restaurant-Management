@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { INITIAL_RESTAURANTS, INITIAL_FOOD_ITEMS, INITIAL_FEEDBACKS } from '@/lib/seed-data';
 import { formatPrice } from '@/lib/utils';
@@ -19,7 +20,9 @@ import {
   Leaf,
   ShieldCheck,
   TrendingUp,
-  Award
+  Award,
+  Store,
+  UtensilsCrossed
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -31,12 +34,55 @@ const CATEGORIES = [
   { id: 'dessert', name: 'Desserts & Cafe', icon: '🍰' },
 ];
 
+const HERO_OFFERS = [
+  {
+    id: 1,
+    title: "50% OFF Biryani Shahi",
+    description: "Get authentic Kacchi Biryani delivered warm and fresh.",
+    image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80",
+    badge: "Limited Deal 🔥",
+    coupon: "SHAHI50",
+    link: "/restaurants/rest_1?selectFood=food_101",
+  },
+  {
+    id: 2,
+    title: "Buy 1 Get 1 Burger Lab",
+    description: "Double patty smash burgers with melted cheddar.",
+    image: "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=800&auto=format&fit=crop&q=80",
+    badge: "BOGO Special 🍔",
+    coupon: "SMASHBOGO",
+    link: "/restaurants/rest_2",
+  },
+  {
+    id: 3,
+    title: "Free Delivery on Pizzas",
+    description: "Woodfired Napoletana pizzas direct to your doorstep.",
+    image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format&fit=crop&q=80",
+    badge: "Free Delivery 🍕",
+    coupon: "PIZZAFREE",
+    link: "/restaurants/rest_3",
+  },
+  {
+    id: 4,
+    title: "25% OFF Sweet Cafe",
+    description: "Indulge in artisanal chocolate cakes and fresh coffees.",
+    image: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=800&auto=format&fit=crop&q=80",
+    badge: "Cafe Delight 🍰",
+    coupon: "SWEET25",
+    link: "/restaurants/rest_5",
+  }
+];
+
 export default function HomePage() {
+  const router = useRouter();
   const { addToCart } = useCart();
   const [searchTerm, setSearchTerm] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
+  const searchContainerRef = React.useRef<HTMLDivElement>(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [vegOnly, setVegOnly] = useState(false);
   const [addedItemNotice, setAddedItemNotice] = useState<string | null>(null);
+  const [currentOfferIndex, setCurrentOfferIndex] = useState(0);
 
   const [restaurants, setRestaurants] = useState(INITIAL_RESTAURANTS);
   const [foods, setFoods] = useState(INITIAL_FOOD_ITEMS);
@@ -61,11 +107,68 @@ export default function HomePage() {
       .catch(() => { });
   }, []);
 
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentOfferIndex((prevIndex) => (prevIndex + 1) % HERO_OFFERS.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Filter matching restaurants for the dropdown suggestions
+  const suggestedRestaurantsAll = searchTerm.trim() ? restaurants.filter(r => {
+    const matchQuery = r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      r.cuisine.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchVeg = vegOnly ? foods.some(f => f.restaurantId === r.id && f.isVeg) : true;
+    return matchQuery && matchVeg;
+  }) : [];
+
+  // Filter matching dishes for the dropdown suggestions
+  const suggestedFoodsAll = searchTerm.trim() ? foods.filter(f => {
+    const matchSearch = f.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      f.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchVeg = vegOnly ? f.isVeg : true;
+    return matchSearch && matchVeg;
+  }) : [];
+
+  // Limit suggestions total to at most 5 items
+  const suggestedRestaurants = suggestedRestaurantsAll.slice(0, 5);
+  const suggestedFoods = suggestedFoodsAll.slice(0, 5 - suggestedRestaurants.length);
+
+  const hasSuggestions = suggestedRestaurants.length > 0 || suggestedFoods.length > 0;
+
   // Filter Restaurants
   const filteredRestaurants = restaurants.filter(r => {
     const matchQuery = r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       r.cuisine.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchQuery;
+    const matchVeg = vegOnly ? foods.some(f => f.restaurantId === r.id && f.isVeg) : true;
+    
+    let matchCat = true;
+    if (selectedCategory !== 'all') {
+      matchCat = foods.some(f => {
+        if (f.restaurantId !== r.id) return false;
+        let foodMatchesCategory = false;
+        if (selectedCategory === 'biryani') foodMatchesCategory = f.category.toLowerCase().includes('biryani') || f.restaurantId === 'rest_1';
+        if (selectedCategory === 'burgers') foodMatchesCategory = f.category.toLowerCase().includes('burger') || f.restaurantId === 'rest_2';
+        if (selectedCategory === 'pizza') foodMatchesCategory = f.category.toLowerCase().includes('pizza') || f.category.toLowerCase().includes('pasta') || f.restaurantId === 'rest_3';
+        if (selectedCategory === 'asian') foodMatchesCategory = f.category.toLowerCase().includes('ramen') || f.category.toLowerCase().includes('sushi') || f.restaurantId === 'rest_4';
+        if (selectedCategory === 'dessert') foodMatchesCategory = f.category.toLowerCase().includes('dessert') || f.category.toLowerCase().includes('beverage') || f.restaurantId === 'rest_5';
+        return foodMatchesCategory;
+      });
+    }
+    
+    return matchQuery && matchVeg && matchCat;
   });
 
   // Filter Food Items
@@ -109,7 +212,7 @@ export default function HomePage() {
       )}
 
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-b from-brand-50/80 via-white to-slate-50 pt-10 pb-16 overflow-hidden">
+      <section className="relative bg-gradient-to-b from-brand-50/80 via-white to-slate-50 pt-10 pb-16">
         <div className="absolute inset-0 bg-[radial-gradient(#f97316_1px,transparent_1px)] [background-size:24px_24px] opacity-10" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
@@ -130,21 +233,164 @@ export default function HomePage() {
                 Order sizzling biryani, gourmet smash burgers, artisan pizzas, and handcrafted ramen from the finest certified kitchens in town.
               </p>
 
-              {/* Search Bar */}
-              <div className="bg-white p-2 rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-200/80 flex flex-col sm:flex-row gap-2 max-w-2xl">
-                <div className="flex-1 flex items-center px-3 gap-3">
-                  <Search className="w-5 h-5 text-slate-400 shrink-0" />
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search restaurant or dish (e.g. Kacchi, Smash Burger, Pizza)..."
-                    className="w-full bg-transparent text-sm focus:outline-none text-slate-800 placeholder-slate-400 font-medium py-2"
-                  />
+              {/* Search Bar Container */}
+              <div ref={searchContainerRef} className="relative max-w-2xl w-full z-50">
+                <div className="bg-white p-2 rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-200/80 flex flex-col sm:flex-row gap-2">
+                  <div className="flex-1 flex items-center px-3 gap-3">
+                    <Search className="w-5 h-5 text-slate-400 shrink-0" />
+                    <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(e) => {
+                        setSearchTerm(e.target.value);
+                        setShowDropdown(true);
+                      }}
+                      onFocus={() => setShowDropdown(true)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') {
+                          setShowDropdown(false);
+                        }
+                      }}
+                      placeholder="Search restaurant or dish (e.g. Kacchi, Smash Burger, Pizza)..."
+                      className="w-full bg-transparent text-sm focus:outline-none text-slate-800 placeholder-slate-400 font-medium py-2"
+                    />
+                  </div>
+                  <button 
+                    onClick={() => {
+                      if (suggestedRestaurants.length > 0) {
+                        router.push(`/restaurants/${suggestedRestaurants[0].id}`);
+                        setShowDropdown(false);
+                      } else if (suggestedFoods.length > 0) {
+                        router.push(`/restaurants/${suggestedFoods[0].restaurantId}?selectFood=${suggestedFoods[0].id}`);
+                        setShowDropdown(false);
+                      } else {
+                        const element = document.getElementById('explore-cuisines');
+                        if (element) {
+                          element.scrollIntoView({ behavior: 'smooth' });
+                        }
+                      }
+                    }}
+                    className="px-6 py-3.5 bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm rounded-xl shadow-md shadow-brand-500/25 transition-all flex items-center justify-center gap-2 shrink-0"
+                  >
+                    Find Food <ArrowRight className="w-4 h-4" />
+                  </button>
                 </div>
-                <button className="px-6 py-3.5 bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm rounded-xl shadow-md shadow-brand-500/25 transition-all flex items-center justify-center gap-2 shrink-0">
-                  Find Food <ArrowRight className="w-4 h-4" />
-                </button>
+
+                {/* Autocomplete Dropdown */}
+                {showDropdown && searchTerm.trim().length > 0 && (
+                  <div className="absolute left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-slide-up-short z-[999]">
+                    {hasSuggestions ? (
+                      <div className="max-h-[420px] overflow-y-auto divide-y divide-slate-50 no-scrollbar">
+                        {/* Restaurants Section */}
+                        {suggestedRestaurants.length > 0 && (
+                          <div className="p-3">
+                            <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2 flex items-center gap-1.5">
+                              <Store className="w-3.5 h-3.5" /> Restaurants
+                            </h5>
+                            <div className="space-y-1">
+                              {suggestedRestaurants.map(rest => (
+                                <button
+                                  key={rest.id}
+                                  onClick={() => {
+                                    router.push(`/restaurants/${rest.id}`);
+                                    setShowDropdown(false);
+                                  }}
+                                  className="w-full text-left px-3 py-2 hover:bg-slate-50 active:bg-slate-100 rounded-xl flex items-center justify-between transition-colors group"
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-slate-100 shrink-0">
+                                      <Image
+                                        src={rest.bannerImage}
+                                        alt={rest.name}
+                                        fill
+                                        className="object-cover"
+                                      />
+                                    </div>
+                                    <div>
+                                      <p className="text-sm font-bold text-slate-800 group-hover:text-brand-500 transition-colors">
+                                        {rest.name}
+                                      </p>
+                                      <p className="text-xs text-slate-400 font-medium">
+                                        {rest.cuisine}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2 text-right">
+                                    <span className="flex items-center gap-1 text-xs font-bold text-amber-500 bg-amber-50 px-2 py-0.5 rounded-lg">
+                                      <Star className="w-3 h-3 fill-amber-500" />
+                                      <span>{rest.rating}</span>
+                                    </span>
+                                    <span className="text-[10px] font-semibold text-slate-400 bg-slate-50 px-2 py-0.5 rounded-lg">
+                                      {rest.deliveryTime}
+                                    </span>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Dishes Section */}
+                        {suggestedFoods.length > 0 && (
+                          <div className="p-3">
+                            <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2 flex items-center gap-1.5">
+                              <UtensilsCrossed className="w-3.5 h-3.5" /> Dishes
+                            </h5>
+                            <div className="space-y-1">
+                              {suggestedFoods.map(food => {
+                                const rest = restaurants.find(r => r.id === food.restaurantId);
+                                return (
+                                  <button
+                                    key={food.id}
+                                    onClick={() => {
+                                      router.push(`/restaurants/${food.restaurantId}?selectFood=${food.id}`);
+                                      setShowDropdown(false);
+                                    }}
+                                    className="w-full text-left px-3 py-2 hover:bg-slate-50 active:bg-slate-100 rounded-xl flex items-center justify-between transition-colors group"
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-slate-100 shrink-0">
+                                        <Image
+                                          src={food.image}
+                                          alt={food.name}
+                                          fill
+                                          className="object-cover"
+                                        />
+                                      </div>
+                                      <div>
+                                        <p className="text-sm font-bold text-slate-800 group-hover:text-brand-500 transition-colors">
+                                          {food.name}
+                                        </p>
+                                        <p className="text-xs text-slate-400 font-medium truncate max-w-[280px]">
+                                          from <span className="font-semibold text-slate-500">{rest?.name || 'Partner Kitchen'}</span>
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-sm font-black text-slate-900">
+                                        {formatPrice(food.price)}
+                                      </span>
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="p-8 text-center">
+                        <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-3">
+                          <Search className="w-5 h-5 text-slate-400" />
+                        </div>
+                        <p className="text-sm font-bold text-slate-700">No matches found</p>
+                        <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
+                          We couldn&apos;t find any restaurant or dish matching &ldquo;{searchTerm}&rdquo;. Try another keyword!
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Stats badges */}
@@ -164,44 +410,79 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right Hero Visual */}
-            <div className="lg:col-span-5 relative">
-              <div className="relative mx-auto max-w-md aspect-square rounded-3xl overflow-hidden shadow-2xl ring-8 ring-white">
-                <Image
-                  src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80"
-                  alt="Delicious gourmet meals"
-                  fill
-                  className="object-cover hover:scale-105 transition-transform duration-700"
-                  priority
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+            {/* Right Hero Visual (Animated circular carousel - Horizontal Slider) */}
+            <div className="lg:col-span-5 relative group">
+              <div className="relative mx-auto max-w-md aspect-square rounded-3xl overflow-hidden shadow-2xl ring-8 ring-white bg-slate-900">
+                {/* Horizontal slider wrapper */}
+                <div 
+                  className="flex w-full h-full transition-transform duration-[800ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
+                  style={{ transform: `translateX(-${currentOfferIndex * 100}%)` }}
+                >
+                  {HERO_OFFERS.map((offer, index) => {
+                    const isActive = index === currentOfferIndex;
+                    return (
+                      <div key={offer.id} className="relative w-full h-full flex-shrink-0">
+                        <Image
+                          src={offer.image}
+                          alt={offer.title}
+                          fill
+                          className={`object-cover transition-transform duration-[4500ms] ease-out ${
+                            isActive ? 'scale-105' : 'scale-100'
+                          }`}
+                          priority={index === 0}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
+                      </div>
+                    );
+                  })}
+                </div>
 
-                {/* Floating badge 1 */}
-                <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-3.5 py-2 rounded-2xl shadow-xl flex items-center gap-2 border border-slate-100 animate-bounce">
+                {/* Floating active offer badge (Top Right) */}
+                <div className="absolute top-4 right-4 z-20 bg-white/95 backdrop-blur-md px-3.5 py-2 rounded-2xl shadow-xl flex items-center gap-2 border border-slate-100 animate-bounce">
                   <Flame className="w-5 h-5 text-coral-500 fill-coral-500" />
                   <div>
-                    <p className="text-[10px] text-slate-500 font-semibold uppercase">Super Deal</p>
-                    <p className="text-xs font-extrabold text-slate-900">20% OFF FIRST ORDER</p>
+                    <p className="text-[10px] text-slate-500 font-semibold uppercase">Featured Deal</p>
+                    <p className="text-xs font-extrabold text-slate-900">{HERO_OFFERS[currentOfferIndex].badge}</p>
                   </div>
                 </div>
 
-                {/* Floating badge 2 */}
-                <div className="absolute bottom-4 left-4 right-4 bg-slate-950/90 backdrop-blur-md p-4 rounded-2xl text-white flex items-center justify-between border border-slate-800">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-brand-500 flex items-center justify-center font-black text-white">
-                      QB
+                {/* Active Offer Promo Banner (Bottom Overlay) */}
+                <div className="absolute bottom-4 left-4 right-4 z-20 bg-slate-950/90 backdrop-blur-md p-4 rounded-2xl text-white border border-slate-800 transition-all duration-500">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="space-y-1 overflow-hidden">
+                      <div className="inline-block px-2 py-0.5 rounded bg-brand-500 text-[10px] font-black uppercase tracking-wider">
+                        Use Code: {HERO_OFFERS[currentOfferIndex].coupon}
+                      </div>
+                      <h4 className="text-sm font-bold text-white leading-tight truncate">
+                        {HERO_OFFERS[currentOfferIndex].title}
+                      </h4>
+                      <p className="text-[11px] text-slate-400 leading-snug truncate">
+                        {HERO_OFFERS[currentOfferIndex].description}
+                      </p>
                     </div>
-                    <div>
-                      <p className="text-xs font-bold text-white">Real-Time Dispatch</p>
-                      <p className="text-[11px] text-slate-400">PostgreSQL Powered High Velocity</p>
-                    </div>
+                    <Link
+                      href={HERO_OFFERS[currentOfferIndex].link}
+                      className="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs rounded-xl shadow-md transition-all shrink-0 hover:scale-105 active:scale-95 flex items-center gap-1"
+                    >
+                      Claim <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
                   </div>
-                  <Link
-                    href="/orders/order_1001"
-                    className="text-xs font-bold text-brand-400 hover:text-brand-300 underline"
-                  >
-                    View Live Order
-                  </Link>
+                </div>
+
+                {/* Bullet Slide Indicators */}
+                <div className="absolute top-1/2 -translate-y-1/2 left-4 z-20 flex flex-col gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+                  {HERO_OFFERS.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentOfferIndex(index)}
+                      className={`w-2 transition-all duration-300 rounded-full ${
+                        index === currentOfferIndex 
+                          ? 'h-6 bg-brand-500' 
+                          : 'h-2 bg-white/60 hover:bg-white'
+                      }`}
+                      aria-label={`Go to slide ${index + 1}`}
+                    />
+                  ))}
                 </div>
               </div>
             </div>
@@ -211,7 +492,7 @@ export default function HomePage() {
       </section>
 
       {/* Category Pills & Filters */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="explore-cuisines" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
           <div>
             <h2 className="text-2xl font-black text-slate-900">Explore Cuisines & Menus</h2>

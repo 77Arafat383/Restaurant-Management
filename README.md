@@ -1,62 +1,126 @@
 # QuickBite — Online Food Ordering System
 
-## 🚀 Overview & Key Features
+QuickBite is an enterprise-grade, high-performance food ordering platform built using **Next.js 14 (App Router)**, **PostgreSQL (Prisma ORM)**, and **Tailwind CSS**. It is fully optimized for ultra-fast response times, responsive layout aesthetics, and local/production environments.
 
-QuickBite is an enterprise-grade, high-performance food ordering platform built using **Next.js 14 (App Router)**, **PostgreSQL (Prisma ORM)**, and **Tailwind CSS**, fully optimized for ultra-fast response times and one-click **Vercel** deployment.
+---
 
-### 🌟 4 Dedicated Stakeholder Experiences:
-1. **Customer Side**:
-   - Multi-cuisine browsing, real-time search, veg/spicy filters.
-   - Persistent basket management with real-time tax & total calculation.
-   - Secure simulated payment gateway (bKash, Nagad, Credit/Debit Cards, Cash on Delivery).
-   - Real-time step-by-step order tracking timeline with live progression simulator.
-   - Customer ratings and feedback submission.
-2. **Restaurant Manager Portal (`/restaurant`)**:
-   - Live incoming order queue with Accept / Reject controls.
-   - Kitchen dispatch workflow (Start Cooking $\to$ Ready for Pickup).
-   - Menu Management (Add dishes, edit pricing, toggle stock availability).
-   - Revenue and daily ticket analytics.
-3. **Delivery Rider Portal (`/delivery`)**:
-   - Available & assigned orders queue.
-   - Step-by-step transit management (Pick Up $\to$ In Transit $\to$ Confirm Handover).
-   - One-touch customer calling and destination details.
-4. **Administrator Console (`/admin`)**:
-   - System overview metrics (Total GMV, completed orders, active kitchens).
-   - User directory with role management.
-   - Partner kitchen verification and approval toggles.
-   - Transaction audit logs and customer review moderation.
+## 🌟 Dedicated Stakeholder Experiences
+
+QuickBite provides four distinct portals, each customized for a specific role in the food delivery ecosystem:
+
+### 1. 🍴 Customer Portal
+- **Cinematic Carousel**: Interactive horizontal hero slider with auto-rotating slides, custom coupon banners, bouncing hot item flame badges, and slide zoom transitions.
+- **Unified Auto-complete Search**:
+  - Searches both **Restaurants** (showing thumbnail, cuisines, rating stars, and delivery times) and **Dishes** (showing name, image, price, and kitchen owner name) simultaneously.
+  - Automatically handles clicking outside and hitting `Escape` to close the suggestion panel.
+- **Deep Linking & Visual Highlights**: Clicking a dish suggestion routes directly to the restaurant page, scrolls the specific item card into view, and applies a high-contrast visual glow (pulsing orange border and scale zoom) for 4 seconds.
+- **Category Filter Pills**: Toggles cuisine types (e.g., Biryani, Pizza, Burger) to filter featured partner kitchens.
+- **Pure Veg Filter**: Hides non-vegetarian items across searching, recommendations, and menus.
+- **Order Search & Cancellation**: Customers can filter their order histories by restaurant/dish name and delete/cancel pending orders directly (via the `DELETE` API route) as long as they are in the `PENDING` state.
+- **Simulated Payment Gateway**: Options for bKash, Nagad, Card, and Cash on Delivery.
+
+### 2. 🏪 Restaurant Manager Portal (`/restaurant`)
+- **Menu Creation with Image Uploader**: Replaced image URL text boxes with a file uploader that generates Base64 preview thumbnails. The base64 payloads are saved directly to the database.
+- **Comma-Separated Multi-Categories**: Managers can set multiple categories on menu items (e.g., `Biryani Specials, Rice, Side Dishes`) by separating tags with commas.
+- **Incoming Orders Board**: Live queue showing order cards with Accept/Reject controls.
+- **Rider Request Approvals**: Displays pending rider delivery assignment requests under active order cards. Managers can click **Accept Rider** or **Deny Rider**.
+- **Handover Button (Dynamically Styled)**: A manual **Ready & Handover to Rider** button is displayed inside order cards. It dynamically turns **green** (`bg-emerald-600`) once a rider assignment request is approved.
+
+### 3. 🛵 Delivery Rider Portal (`/delivery`)
+- **Board Splitting**: Divided into two tabs:
+  - **My Runs**: Displays active deliveries currently in transit.
+  - **Available Jobs**: Shows unassigned orders ready for delivery.
+- **Request Assignment**: Riders browse the unassigned posting list and click **Request Assignment** to queue their request on the kitchen manager's board.
+- **Transit Stepper**: Pick Up $\to$ In Transit $\to$ Confirm Handover buttons to complete deliveries.
+
+### 4. 🛡️ Admin Console (`/admin`)
+- **System Overview KPIs**: Live counters for Gross Merchandise Value (GMV), Total System Orders, Active Kitchens, and Registered Accounts.
+- **Platform Search Bars**: Search inputs integrated across three sections:
+  - **Recent Transactions**: Filter order rows by customer, restaurant, or order number.
+  - **User Directory**: Search user accounts by name, email, or role.
+  - **Restaurant Approvals**: Search partner kitchens by name, cuisine, or address.
+- **System Entity Deletion**: Admins can permanently delete **User Accounts**, **Restaurants** (automatically cleaning up associated menu dishes to prevent orphan data), and **Customer Reviews**.
+- **Merchant Verification**: Approve pending partner registrations or suspend accounts.
 
 ---
 
 ## 🛠️ Tech Stack & Architecture
 
-- **Frontend & Serverless Engine**: Next.js 14 App Router, React 18, TypeScript
-- **Styling & UI**: Tailwind CSS, Lucide React, Modern Glassmorphism
-- **Database & ORM**: PostgreSQL via Prisma ORM (prepared for Vercel Postgres / Neon / Supabase)
-- **Deployment**: Vercel Serverless Ready with Edge optimization
+- **Frontend Framework**: Next.js 14 (App Router) & React 18
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS & Lucide React Icons
+- **Database ORM**: Prisma ORM (configured for PostgreSQL / Neon / local database JSON file-store)
+- **Local Persistence Store**: File-based local JSON data-store wrapper (`prisma/quickbite_db.json`) for seamless zero-config local runs.
 
 ---
 
-## ⚡ Quick Start (Local Development)
+## ⚡ Quick Start: Step-by-Step Local Setup
 
+Follow these steps to clone the project, install dependencies, and start the application on your local machine:
+
+### 1. Clone the GitHub Repository
+Open your terminal/command prompt and run:
 ```bash
-# 1. Install dependencies
+git clone https://github.com/77Arafat383/Restaurant-Management.git
+cd Restaurant-Management
+```
+
+### 2. Install Project Dependencies
+Use `npm` to install all package modules:
+```bash
 npm install
+```
 
-# 2. Generate Prisma Client
-npm run prisma:generate
+### 3. Generate Prisma Client
+Generate the local Prisma Client bindings:
+```bash
+npx prisma generate
+```
 
-# 3. Start development server
+### 4. Configure Environment Variables (Optional)
+The project comes pre-configured with a local JSON store fallback (`prisma/quickbite_db.json`), meaning you **do not need** to install or run a live PostgreSQL database server for local development.
+
+If you wish to connect to a live PostgreSQL server, create a `.env` file in the root directory:
+```env
+DATABASE_URL="postgresql://username:password@localhost:5432/quickbite_db"
+```
+
+### 5. Launch the Local Development Server
+Start the development server:
+```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+### 6. Access the Application
+Open your browser and navigate to:
+**[http://localhost:3000](http://localhost:3000)**
 
 ---
 
-## 🌐 Deploy to Vercel
+## 🔑 Pre-configured Testing Credentials
 
-1. Push this repository to GitHub / GitLab.
-2. Import project on [Vercel](https://vercel.com).
-3. (Optional) Connect a **Vercel Postgres** or **Neon Database** and add `DATABASE_URL` in Environment Variables.
-4. Deploy! Next.js will automatically build and deploy the edge-optimized application.
+Use the following credentials to sign in and test the different portal experiences:
+
+| Role | Email Address | Password | Portal Route |
+| :--- | :--- | :--- | :--- |
+| **Customer** | `customer@quickbite.com` | `password123` | `/` |
+| **Kitchen Manager** | `manager@quickbite.com` | `password123` | `/restaurant` |
+| **Delivery Rider** | `delivery@quickbite.com` | `password123` | `/delivery` |
+| **System Administrator** | `admin@quickbite.com` | `password123` | `/admin` |
+
+*Note: You can trigger register modals inside the top Navbar block to create new users of any role type.*
+
+---
+
+## 🌐 Build & Deployment
+
+To compile the production build locally:
+```bash
+npm run build
+```
+
+### Vercel Deployment
+1. Push your cloned repository branch to your own GitHub/GitLab account.
+2. Log in to [Vercel](https://vercel.com) and import the project.
+3. If connecting to a live database (e.g., Neon or Supabase), add your `DATABASE_URL` as an environment variable.
+4. Deploy. Vercel will automatically compile the serverless routes.

@@ -33,16 +33,28 @@ jobs:
       - name: Generate Prisma client
         run: npm run prisma:generate
 
-      - name: Push Prisma schema to Supabase
-        run: npm run prisma:deploy
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
       - name: Pull Vercel environment
         run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Push Prisma schema to Supabase
+        run: |
+          if [ -z "${DATABASE_URL:-}" ] && [ -f .vercel/.env.production.local ]; then
+            set -a
+            source .vercel/.env.production.local
+            set +a
+          fi
+
+          if [ -z "${DATABASE_URL:-}" ]; then
+            echo "DATABASE_URL is not set. Add DATABASE_URL as a GitHub Actions secret or Vercel production environment variable."
+            exit 1
+          fi
+
+          npm run prisma:deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Build with Vercel
         run: npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}

@@ -222,16 +222,8 @@
     {
       "id": "food_2",
       "restaurantId": "rest_1",
-      "name": "Shahi Chicken Roast with Polao",
-      "description": "Rich almond and poppy seed gravy cooked whole chicken leg served with fragrant ghee polao.",
-      "price": 290,
-      "category": "Main Course",
-      "isAvailable": true,
-      "image": "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=500&auto=format&fit=crop&q=80",
-      "isVeg": false,
-      "isSpicy": false,
-      "rating": 4.8,
-      "preparationTime": "15 min"
+      "isAvailable": false,
+      "rating": 4.8
     },
     {
       "id": "food_3",
@@ -545,47 +537,6 @@
       "deliveryPersonId": "user_1788057505524_747",
       "deliveryPersonName": "Mahmud",
       "deliveryPersonPhone": "01812345678"
-    },
-    {
-      "id": "order_1788027879994",
-      "orderNumber": "QB-8263",
-      "customerId": "user_1788027865188_807",
-      "customerName": "Fahim Hasan",
-      "customerEmail": "fahim@quickbite.com",
-      "customerPhone": "+880 1788-112233",
-      "deliveryAddress": "Uttara Sector 11, Dhaka",
-      "restaurantId": "rest_2",
-      "restaurantName": "Smash Burger Lab",
-      "restaurantAddress": "Dhaka",
-      "items": [
-        {
-          "foodItemId": "food_4",
-          "name": "The Beast Double Smash Burger",
-          "price": 420,
-          "quantity": 1,
-          "subtotal": 420
-        },
-        {
-          "foodItemId": "food_5",
-          "name": "Crispy Peri-Peri Fries",
-          "price": 160,
-          "quantity": 1,
-          "subtotal": 160
-        }
-      ],
-      "subtotal": 580,
-      "deliveryFee": 45,
-      "tax": 29,
-      "discount": 0,
-      "totalAmount": 654,
-      "status": "PENDING",
-      "paymentMethod": "BKASH",
-      "paymentStatus": "COMPLETED",
-      "transactionId": "TRX_1788027879994",
-      "notes": "Extra ketchup please",
-      "estimatedDeliveryTime": "30-40 mins",
-      "createdAt": "2026-08-29T18:24:39.994Z",
-      "updatedAt": "2026-08-29T18:24:39.994Z"
     },
     {
       "id": "order_1001",

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
-import { INITIAL_RESTAURANTS, INITIAL_FOOD_ITEMS, INITIAL_FEEDBACKS } from '@/lib/seed-data';
+import { FoodItem, Restaurant } from '@/lib/types';
 import { formatPrice } from '@/lib/utils';
 import {
   Search,
@@ -84,8 +84,8 @@ export default function HomePage() {
   const [addedItemNotice, setAddedItemNotice] = useState<string | null>(null);
   const [currentOfferIndex, setCurrentOfferIndex] = useState(0);
 
-  const [restaurants, setRestaurants] = useState(INITIAL_RESTAURANTS);
-  const [foods, setFoods] = useState(INITIAL_FOOD_ITEMS);
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [foods, setFoods] = useState<FoodItem[]>([]);
 
   React.useEffect(() => {
     fetch('/api/restaurants')
@@ -617,7 +617,7 @@ export default function HomePage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredFoods.map(food => {
-            const rest = INITIAL_RESTAURANTS.find(r => r.id === food.restaurantId);
+            const rest = restaurants.find(r => r.id === food.restaurantId);
             return (
               <div
                 key={food.id}

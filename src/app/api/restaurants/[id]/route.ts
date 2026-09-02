@@ -6,7 +6,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const restaurant = localStore.getRestaurantById(params.id);
+    const restaurant = await localStore.getRestaurantById(params.id);
     if (!restaurant) {
       return NextResponse.json({ success: false, error: 'Restaurant not found' }, { status: 404 });
     }

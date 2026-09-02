@@ -4,9 +4,9 @@ import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { INITIAL_RESTAURANTS, INITIAL_FOOD_ITEMS, INITIAL_FEEDBACKS } from '@/lib/seed-data';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
+import { Feedback, FoodItem, Restaurant } from '@/lib/types';
 import { formatPrice } from '@/lib/utils';
 import { 
   Star, 
@@ -61,15 +61,9 @@ export default function RestaurantDetailPage() {
     }
   };
 
-  const [restaurant, setRestaurant] = useState(
-    INITIAL_RESTAURANTS.find(r => r.id === restaurantId) || INITIAL_RESTAURANTS[0]
-  );
-  const [allFoods, setAllFoods] = useState(
-    INITIAL_FOOD_ITEMS.filter(f => f.restaurantId === (restaurantId || 'rest_1'))
-  );
-  const [feedbacks, setFeedbacks] = useState(
-    INITIAL_FEEDBACKS.filter(f => f.restaurantId === (restaurantId || 'rest_1'))
-  );
+  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+  const [allFoods, setAllFoods] = useState<FoodItem[]>([]);
+  const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
 
   React.useEffect(() => {
     if (restaurantId) {
@@ -156,6 +150,7 @@ export default function RestaurantDetailPage() {
   });
 
   const handleAdd = (food: typeof allFoods[0]) => {
+    if (!restaurant) return;
     const success = addToCart(food, restaurant.name);
     if (success) {
       setToMessage(`Added ${food.name} to basket`);
@@ -167,6 +162,14 @@ export default function RestaurantDetailPage() {
     const found = cart.find(ci => ci.foodItem.id === foodId);
     return found ? found.quantity : 0;
   };
+
+  if (!restaurant) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+        <p className="text-sm font-bold text-slate-600">Loading restaurant from database...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="pb-24">

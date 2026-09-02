@@ -6,7 +6,7 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const restaurantId = searchParams.get('restaurantId') || undefined;
-    const feedbacks = localStore.getFeedbacks(restaurantId);
+    const feedbacks = await localStore.getFeedbacks(restaurantId);
     return NextResponse.json({ success: true, data: feedbacks });
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Failed to fetch feedbacks' }, { status: 500 });
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
       createdAt: new Date().toISOString(),
     };
 
-    const saved = localStore.createFeedback(newFeedback);
+    const saved = await localStore.createFeedback(newFeedback);
     return NextResponse.json({ success: true, data: saved }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Failed to submit review' }, { status: 500 });
@@ -45,7 +45,7 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ success: false, error: 'Feedback ID is required.' }, { status: 400 });
     }
 
-    const deleted = localStore.deleteFeedback(id);
+    const deleted = await localStore.deleteFeedback(id);
     if (!deleted) {
       return NextResponse.json({ success: false, error: 'Feedback not found.' }, { status: 404 });
     }

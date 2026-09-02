@@ -13,7 +13,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const user = db.getUserByEmail(email);
+    const user = await db.getUserByEmail(email);
     if (!user) {
       return NextResponse.json(
         { success: false, error: 'No user found with this email address.' },

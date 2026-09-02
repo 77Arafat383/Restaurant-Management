@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     }
 
     // Check if email already exists
-    const existing = db.getUserByEmail(email);
+    const existing = await db.getUserByEmail(email);
     if (existing) {
       return NextResponse.json(
         { success: false, error: 'An account with this email address already exists.' },
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
       avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name.trim())}`,
     };
 
-    const savedUser = db.createUser(newUser);
+    const savedUser = await db.createUser(newUser);
 
     // Return safe user representation
     const { password: _, ...safeUser } = savedUser;

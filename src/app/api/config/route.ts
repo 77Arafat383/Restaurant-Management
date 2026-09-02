@@ -3,7 +3,7 @@ import { localStore } from '@/lib/db';
 
 export async function GET() {
   try {
-    const config = localStore.getConfig();
+    const config = await localStore.getConfig();
     return NextResponse.json({ success: true, data: config });
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Failed to fetch configuration.' }, { status: 500 });
@@ -23,7 +23,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: 'Delivery charge must be a non-negative number.' }, { status: 400 });
     }
 
-    const updated = localStore.updateConfig({
+    const updated = await localStore.updateConfig({
       vatRate: vatRate !== undefined ? Number(vatRate) : undefined,
       deliveryCharge: deliveryCharge !== undefined ? Number(deliveryCharge) : undefined,
     });

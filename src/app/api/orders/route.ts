@@ -9,7 +9,7 @@ export async function GET(req: Request) {
     const restaurantId = searchParams.get('restaurantId') || undefined;
     const deliveryPersonId = searchParams.get('deliveryPersonId') || undefined;
 
-    const orders = localStore.getOrders({ customerId, restaurantId, deliveryPersonId });
+    const orders = await localStore.getOrders({ customerId, restaurantId, deliveryPersonId });
     return NextResponse.json({ success: true, data: orders });
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Failed to fetch orders' }, { status: 500 });
@@ -48,7 +48,7 @@ export async function POST(req: Request) {
       updatedAt: new Date().toISOString(),
     };
 
-    const created = localStore.createOrder(newOrder);
+    const created = await localStore.createOrder(newOrder);
     return NextResponse.json({ success: true, data: created }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Failed to create order' }, { status: 500 });

@@ -3,10 +3,12 @@ import { localStore } from '@/lib/db';
 
 export async function GET() {
   try {
-    const users = localStore.getUsers();
-    const restaurants = localStore.getRestaurants();
-    const orders = localStore.getOrders();
-    const feedbacks = localStore.getFeedbacks();
+    const [users, restaurants, orders, feedbacks] = await Promise.all([
+      localStore.getUsers(),
+      localStore.getRestaurants(),
+      localStore.getOrders(),
+      localStore.getFeedbacks(),
+    ]);
 
     const totalGMV = orders.reduce((sum, o) => (o.status !== 'CANCELLED' && o.status !== 'REJECTED' ? sum + o.totalAmount : sum), 0);
     const completedOrders = orders.filter(o => o.status === 'DELIVERED').length;

@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { FoodItem, Order, OrderStatus } from '@/lib/types';
-import { INITIAL_RESTAURANTS, INITIAL_FOOD_ITEMS } from '@/lib/seed-data';
+import { FoodItem, Order, OrderStatus, Restaurant } from '@/lib/types';
 import { formatPrice, formatDate } from '@/lib/utils';
 import {
   Store,
@@ -31,6 +30,7 @@ export default function RestaurantManagerPortal() {
   // Menu items state
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [loading, setLoading] = useState(true);
 
   // New Item Modal
@@ -44,7 +44,6 @@ export default function RestaurantManagerPortal() {
   const [newItemImage, setNewItemImage] = useState('');
 
   const restaurantId = currentUser?.restaurantId || 'rest_1';
-  const restaurant = INITIAL_RESTAURANTS.find(r => r.id === restaurantId) || INITIAL_RESTAURANTS[0];
 
   const loadData = async () => {
     try {
@@ -53,11 +52,14 @@ export default function RestaurantManagerPortal() {
         fetch(`/api/foods?restaurantId=${restaurantId}`),
         fetch(`/api/orders?restaurantId=${restaurantId}`),
       ]);
+      const restaurantRes = await fetch(`/api/restaurants/${restaurantId}`);
       const foodsData = await foodsRes.json();
       const ordersData = await ordersRes.json();
+      const restaurantData = await restaurantRes.json();
 
       if (foodsData.success) setFoodItems(foodsData.data);
       if (ordersData.success) setOrders(ordersData.data);
+      if (restaurantData.success) setRestaurant(restaurantData.data);
     } catch (e) {
       console.error('Failed to load restaurant data', e);
     } finally {
@@ -215,8 +217,8 @@ export default function RestaurantManagerPortal() {
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Live Orders Connected
               </span>
             </div>
-            <h1 className="text-2xl font-black text-slate-900 mt-1">{restaurant.name}</h1>
-            <p className="text-xs text-slate-500">{restaurant.address} • Manager: {currentUser.name}</p>
+            <h1 className="text-2xl font-black text-slate-900 mt-1">{restaurant?.name || 'Loading kitchen...'}</h1>
+            <p className="text-xs text-slate-500">{restaurant?.address || 'Connected to database'} • Manager: {currentUser.name}</p>
           </div>
         </div>
 

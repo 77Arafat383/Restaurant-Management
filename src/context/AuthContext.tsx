@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserRole } from '@/lib/types';
-import { INITIAL_USERS } from '@/lib/seed-data';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -34,7 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalTab, setAuthModalTab] = useState<'login' | 'register'>('login');
   const [authPromptMessage, setAuthPromptMessage] = useState<string | null>(null);
-  const [availableUsers, setAvailableUsers] = useState<User[]>(INITIAL_USERS);
+  const [availableUsers, setAvailableUsers] = useState<User[]>([]);
 
   useEffect(() => {
     // Load active session from localStorage if exists
@@ -145,7 +144,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const switchRole = (role: UserRole) => {
-    const found = availableUsers.find(u => u.role === role) || INITIAL_USERS.find(u => u.role === role);
+    const found = availableUsers.find(u => u.role === role);
     if (found) {
       setCurrentUser(found);
       localStorage.setItem('quickbite_user_session', JSON.stringify(found));

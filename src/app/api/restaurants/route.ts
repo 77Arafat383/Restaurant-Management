@@ -3,7 +3,7 @@ import { localStore } from '@/lib/db';
 
 export async function GET() {
   try {
-    const restaurants = localStore.getRestaurants();
+    const restaurants = await localStore.getRestaurants();
     return NextResponse.json({ success: true, data: restaurants });
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Failed to fetch restaurants' }, { status: 500 });
@@ -13,7 +13,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const newRestaurant = localStore.createRestaurant({
+    const newRestaurant = await localStore.createRestaurant({
       id: `rest_${Date.now()}`,
       name: body.name,
       description: body.description || '',
@@ -48,7 +48,7 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ success: false, error: 'Restaurant ID is required.' }, { status: 400 });
     }
 
-    const deleted = localStore.deleteRestaurant(id);
+    const deleted = await localStore.deleteRestaurant(id);
     if (!deleted) {
       return NextResponse.json({ success: false, error: 'Restaurant not found.' }, { status: 404 });
     }

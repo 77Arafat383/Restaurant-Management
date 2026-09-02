@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Phone, MapPin, Send, ShieldCheck, GraduationCap, Users, Clock, Sparkles, Star } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { INITIAL_FEEDBACKS } from '@/lib/seed-data';
+import { Feedback } from '@/lib/types';
 
 export default function AboutContact() {
   const { currentUser } = useAuth();
@@ -14,6 +14,7 @@ export default function AboutContact() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -37,6 +38,15 @@ export default function AboutContact() {
     const timer = setTimeout(handleScroll, 150);
 
     window.addEventListener('hashchange', handleScroll);
+    fetch('/api/feedback')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && Array.isArray(data.data)) {
+          setFeedbacks(data.data);
+        }
+      })
+      .catch(() => {});
+
     return () => {
       clearTimeout(timer);
       window.removeEventListener('hashchange', handleScroll);
@@ -58,9 +68,12 @@ export default function AboutContact() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          customerId: currentUser?.id || 'anonymous',
+          customerId: currentUser?.id || 'user_cust_1',
           customerName: name || 'Anonymous Guest',
           customerAvatar: currentUser?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Guest',
+          orderId: 'order_1001',
+          restaurantId: 'rest_1',
+          restaurantName: 'Royal Biryani House',
           rating: rating,
           comment: comment.trim(),
         }),
@@ -176,7 +189,7 @@ export default function AboutContact() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {INITIAL_FEEDBACKS.map(fb => (
+          {feedbacks.map(fb => (
             <div key={fb.id} className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/60 shadow-sm space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">

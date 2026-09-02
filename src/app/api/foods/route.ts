@@ -5,7 +5,7 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const restaurantId = searchParams.get('restaurantId') || undefined;
-    const items = localStore.getFoodItems(restaurantId);
+    const items = await localStore.getFoodItems(restaurantId);
     return NextResponse.json({ success: true, data: items });
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Failed to fetch food items' }, { status: 500 });
@@ -15,7 +15,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const newItem = localStore.createFoodItem({
+    const newItem = await localStore.createFoodItem({
       id: `food_${Date.now()}`,
       restaurantId: body.restaurantId,
       name: body.name,
@@ -43,7 +43,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ success: false, error: 'Item ID required' }, { status: 400 });
     }
 
-    const updated = localStore.updateFoodItem(body.id, {
+    const updated = await localStore.updateFoodItem(body.id, {
       name: body.name,
       description: body.description,
       price: body.price !== undefined ? Number(body.price) : undefined,
@@ -73,7 +73,7 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ success: false, error: 'Item ID required' }, { status: 400 });
     }
 
-    const deleted = localStore.deleteFoodItem(id);
+    const deleted = await localStore.deleteFoodItem(id);
     if (!deleted) {
       return NextResponse.json({ success: false, error: 'Item not found' }, { status: 404 });
     }

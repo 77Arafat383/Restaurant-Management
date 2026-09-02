@@ -3,7 +3,7 @@ import { db } from '@/lib/db';
 
 export async function GET() {
   try {
-    const users = db.getUsers().map(u => {
+    const users = (await db.getUsers()).map(u => {
       const { password, ...safeUser } = u;
       return safeUser;
     });
@@ -22,7 +22,7 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ success: false, error: 'User ID is required.' }, { status: 400 });
     }
 
-    const updated = db.updateUserApproval(id, isApproved);
+    const updated = await db.updateUserApproval(id, isApproved);
     if (!updated) {
       return NextResponse.json({ success: false, error: 'User not found.' }, { status: 404 });
     }
@@ -43,7 +43,7 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ success: false, error: 'User ID is required.' }, { status: 400 });
     }
 
-    const deleted = db.deleteUser(id);
+    const deleted = await db.deleteUser(id);
     if (!deleted) {
       return NextResponse.json({ success: false, error: 'User not found.' }, { status: 404 });
     }

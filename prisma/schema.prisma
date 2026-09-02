@@ -1,13 +1,13 @@
 // Prisma Schema for QuickBite Online Food Ordering System
-// Persistent SQLite Database
+// PostgreSQL database
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -19,6 +19,8 @@ model User {
   address          String?
   role             String       @default("CUSTOMER") // CUSTOMER, RESTAURANT_MANAGER, DELIVERY_PERSON, ADMIN
   avatar           String?
+  restaurantId     String?
+  isApproved       Boolean      @default(true)
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
 
@@ -116,6 +118,10 @@ model Order {
   contactPhone        String?
   notes               String?
   estimatedDeliveryTime String?      @default("35-45 mins")
+  requestedDeliveryPersonId String?
+  requestedDeliveryPersonName String?
+  requestedDeliveryPersonPhone String?
+  deliveryRequestStatus String?
   
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
@@ -191,4 +197,14 @@ model Feedback {
   createdAt       DateTime    @default(now())
 
   @@map("feedbacks")
+}
+
+model AppConfig {
+  id             String   @id @default("default")
+  vatRate        Float    @default(0.05)
+  deliveryCharge Float    @default(40.0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("app_config")
 }

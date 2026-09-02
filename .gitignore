@@ -31,3 +31,10 @@ next-env.d.ts
 
 # project files
 proposal-quick.pdf
+
+# seed & unsafe files
+*seed*
+*.sql
+opencode.json
+
+

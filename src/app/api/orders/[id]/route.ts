@@ -6,7 +6,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const order = localStore.getOrderById(params.id);
+    const order = await localStore.getOrderById(params.id);
     if (!order) {
       return NextResponse.json({ success: false, error: 'Order not found' }, { status: 404 });
     }
@@ -22,7 +22,7 @@ export async function PATCH(
 ) {
   try {
     const body = await req.json();
-    const updated = localStore.updateOrder(params.id, body);
+    const updated = await localStore.updateOrder(params.id, body);
 
     if (!updated) {
       return NextResponse.json({ success: false, error: 'Order not found' }, { status: 404 });
@@ -39,7 +39,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const order = localStore.getOrderById(params.id);
+    const order = await localStore.getOrderById(params.id);
     if (!order) {
       return NextResponse.json({ success: false, error: 'Order not found' }, { status: 404 });
     }
@@ -51,7 +51,7 @@ export async function DELETE(
       );
     }
 
-    const deleted = localStore.deleteOrder(params.id);
+    const deleted = await localStore.deleteOrder(params.id);
     return NextResponse.json({ success: true, data: deleted });
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Failed to delete order' }, { status: 500 });

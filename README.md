@@ -123,7 +123,7 @@ npm run build
 1. Push your repository to GitHub.
 2. Import the project in [Vercel](https://vercel.com) once and add the production environment variables, including `DATABASE_URL`.
 3. Add these GitHub repository secrets under **Settings > Secrets and variables > Actions**:
-- `DATABASE_URL`: Supabase PostgreSQL connection string used by Prisma.
+- `DATABASE_URL` (recommended): Supabase PostgreSQL connection string used by Prisma. If this secret is missing, the deploy workflow falls back to `DATABASE_URL` from Vercel production environment variables.
 - `VERCEL_TOKEN`: Vercel account token.
 - `VERCEL_ORG_ID`: Vercel team/user id.
 - `VERCEL_PROJECT_ID`: Vercel project id.

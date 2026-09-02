@@ -86,8 +86,11 @@ export default function ThermalReceiptModal({ order, isOpen, onClose }: ThermalR
             </div>
           ) : (
             <>
-
-
+              {/* Screen Instruction Notice */}
+              <div className="w-full max-w-[320px] mb-3 p-2.5 bg-amber-50 border border-amber-200/80 rounded-xl text-[11px] text-amber-900 font-medium flex items-center justify-between no-print">
+                <span>Formatted for standard 80mm POS paper rolls</span>
+                <span className="font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded text-[10px]">80mm</span>
+              </div>
 
               {/* Printable 80mm Receipt Container */}
               <div
@@ -213,7 +216,7 @@ export default function ThermalReceiptModal({ order, isOpen, onClose }: ThermalR
               className="px-6 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-brand-500/25 transition-all hover:scale-105"
             >
               <Printer className="w-4 h-4" />
-              <span>Print 80mm Receipt</span>
+              <span>Print Receipt</span>
             </button>
           </div>
         )}

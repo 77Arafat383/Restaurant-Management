@@ -38,3 +38,6 @@ proposal-quick.pdf
 opencode.json
 
 
+
+.vercel
+.env*

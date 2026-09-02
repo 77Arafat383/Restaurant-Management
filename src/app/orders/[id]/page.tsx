@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
 import { Order, OrderStatus } from '@/lib/types';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { 
@@ -17,8 +18,10 @@ import {
   AlertCircle, 
   Flame, 
   ShieldCheck, 
+  ShieldAlert,
   Send,
-  RefreshCw
+  RefreshCw,
+  LogIn
 } from 'lucide-react';
 
 const STATUS_STEPS: { status: OrderStatus; label: string; description: string; icon: React.ElementType }[] = [
@@ -32,6 +35,7 @@ const STATUS_STEPS: { status: OrderStatus; label: string; description: string; i
 export default function OrderTrackingPage() {
   const params = useParams();
   const orderId = params.id as string;
+  const { currentUser, openAuthModal } = useAuth();
 
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
@@ -116,6 +120,66 @@ export default function OrderTrackingPage() {
         >
           <ArrowLeft className="w-4 h-4" /> Back to Home
         </Link>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-20 text-center space-y-6">
+        <div className="w-20 h-20 rounded-3xl bg-brand-50 text-brand-600 flex items-center justify-center mx-auto shadow-inner">
+          <ShieldAlert className="w-10 h-10" />
+        </div>
+        <div className="space-y-2">
+          <h1 className="text-3xl font-black text-slate-900">Sign In to View Order Details</h1>
+          <p className="text-sm text-slate-500 max-w-md mx-auto">
+            Please log in to your QuickBite account to access live tracking and receipt details for this order.
+          </p>
+        </div>
+        <div className="flex items-center justify-center gap-3 pt-2">
+          <button
+            onClick={() => openAuthModal('login', 'Please sign in to access your order tracking.')}
+            className="px-6 py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-2xl text-xs font-bold flex items-center gap-2 shadow-lg shadow-brand-500/25 transition-all hover:scale-105"
+          >
+            <LogIn className="w-4 h-4" /> Sign In
+          </button>
+          <Link
+            href="/orders"
+            className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl text-xs font-bold flex items-center gap-2 transition-all"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back to My Orders
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const isAuthorized =
+    currentUser.role === 'ADMIN' ||
+    currentUser.role === 'RESTAURANT_MANAGER' ||
+    currentUser.role === 'DELIVERY_PERSON' ||
+    order.customerId === currentUser.id;
+
+  if (!isAuthorized) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-20 text-center space-y-6">
+        <div className="w-20 h-20 rounded-3xl bg-red-50 text-red-600 flex items-center justify-center mx-auto shadow-inner">
+          <ShieldAlert className="w-10 h-10" />
+        </div>
+        <div className="space-y-2">
+          <h1 className="text-3xl font-black text-slate-900">Access Restricted</h1>
+          <p className="text-sm text-slate-500 max-w-md mx-auto">
+            This order belongs to another customer. You do not have permission to view its tracking details.
+          </p>
+        </div>
+        <div className="flex items-center justify-center gap-3 pt-2">
+          <Link
+            href="/orders"
+            className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-xs font-bold flex items-center gap-2 transition-all shadow-md"
+          >
+            <ArrowLeft className="w-4 h-4" /> View My Orders
+          </Link>
+        </div>
       </div>
     );
   }

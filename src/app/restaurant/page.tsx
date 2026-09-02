@@ -68,8 +68,12 @@ export default function RestaurantManagerPortal() {
   };
 
   useEffect(() => {
-    loadData();
-  }, [restaurantId]);
+    if (currentUser && (currentUser.role === 'RESTAURANT_MANAGER' || currentUser.role === 'ADMIN')) {
+      loadData();
+    } else {
+      setLoading(false);
+    }
+  }, [restaurantId, currentUser]);
 
   if (!currentUser || (currentUser.role !== 'RESTAURANT_MANAGER' && currentUser.role !== 'ADMIN')) {
     return (

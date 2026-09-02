@@ -15,11 +15,12 @@ import {
   AlertCircle,
   Eye,
   Search,
-  Trash2
+  Trash2,
+  LogIn
 } from 'lucide-react';
 
 export default function OrdersHistoryPage() {
-  const { currentUser } = useAuth();
+  const { currentUser, openAuthModal } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -52,8 +53,23 @@ export default function OrdersHistoryPage() {
 
   useEffect(() => {
     async function loadOrders() {
+      if (!currentUser) {
+        setOrders([]);
+        setLoading(false);
+        return;
+      }
       try {
-        const res = await fetch('/api/orders');
+        setLoading(true);
+        let url = '/api/orders';
+        if (currentUser.role === 'CUSTOMER') {
+          url += `?customerId=${currentUser.id}`;
+        } else if (currentUser.role === 'RESTAURANT_MANAGER' && currentUser.restaurantId) {
+          url += `?restaurantId=${currentUser.restaurantId}`;
+        } else if (currentUser.role === 'DELIVERY_PERSON') {
+          url += `?deliveryPersonId=${currentUser.id}`;
+        }
+
+        const res = await fetch(url);
         const data = await res.json();
         if (data.success) {
           setOrders(data.data);
@@ -65,7 +81,37 @@ export default function OrdersHistoryPage() {
       }
     }
     loadOrders();
-  }, []);
+  }, [currentUser]);
+
+  if (!currentUser) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-20 text-center space-y-6">
+        <div className="w-20 h-20 rounded-3xl bg-brand-50 text-brand-600 flex items-center justify-center mx-auto shadow-inner">
+          <ShoppingBag className="w-10 h-10" />
+        </div>
+        <div className="space-y-2">
+          <h1 className="text-3xl font-black text-slate-900">Sign In to View Orders</h1>
+          <p className="text-sm text-slate-500 max-w-md mx-auto">
+            Please log in to your QuickBite account to view your purchase history, track live deliveries, and reorder.
+          </p>
+        </div>
+        <div className="flex items-center justify-center gap-3 pt-2">
+          <button
+            onClick={() => openAuthModal('login', 'Please sign in to view your orders.')}
+            className="px-6 py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-2xl text-xs font-bold flex items-center gap-2 shadow-lg shadow-brand-500/25 transition-all hover:scale-105"
+          >
+            <LogIn className="w-4 h-4" /> Sign In
+          </button>
+          <Link
+            href="/"
+            className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl text-xs font-bold flex items-center gap-2 transition-all"
+          >
+            <ArrowRight className="w-4 h-4" /> Browse Restaurants
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">

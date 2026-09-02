@@ -61,8 +61,12 @@ export default function DeliveryPartnerPortal() {
   };
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    if (currentUser && (currentUser.role === 'DELIVERY_PERSON' || currentUser.role === 'ADMIN')) {
+      fetchOrders();
+    } else {
+      setLoading(false);
+    }
+  }, [currentUser]);
 
   const handleUpdateDelivery = async (orderId: string, status: OrderStatus) => {
     try {

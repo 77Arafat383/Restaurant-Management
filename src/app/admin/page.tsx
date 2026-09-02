@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { User, Restaurant, Order, Feedback } from '@/lib/types';
 import { formatPrice, formatDate } from '@/lib/utils';
 import {
   ShieldCheck,
+  ShieldAlert,
   Users,
   Store,
   DollarSign,
@@ -18,11 +20,13 @@ import {
   Search,
   Activity,
   Trash2,
-  Settings
+  Settings,
+  LogIn,
+  ArrowLeft
 } from 'lucide-react';
 
 export default function AdminConsolePage() {
-  const { currentUser } = useAuth();
+  const { currentUser, openAuthModal } = useAuth();
   const [activeSection, setActiveSection] = useState<'OVERVIEW' | 'USERS' | 'RESTAURANTS' | 'ORDERS' | 'FEEDBACK' | 'SETTINGS'>('OVERVIEW');
 
   const [stats, setStats] = useState({
@@ -135,8 +139,12 @@ export default function AdminConsolePage() {
   };
 
   useEffect(() => {
-    fetchAdminData();
-  }, []);
+    if (currentUser?.role === 'ADMIN') {
+      fetchAdminData();
+    } else {
+      setLoading(false);
+    }
+  }, [currentUser]);
 
   const handleToggleApproval = (restId: string) => {
     setRestaurants(restaurants.map(r => (r.id === restId ? { ...r, isApproved: !r.isApproved } : r)));
@@ -246,6 +254,40 @@ export default function AdminConsolePage() {
       r.address.toLowerCase().includes(query)
     );
   });
+
+  if (!currentUser || currentUser.role !== 'ADMIN') {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-20 text-center space-y-6">
+        <div className="w-20 h-20 rounded-3xl bg-purple-100 text-purple-700 flex items-center justify-center mx-auto shadow-inner">
+          <ShieldAlert className="w-10 h-10" />
+        </div>
+        <div className="space-y-2">
+          <h1 className="text-3xl font-black text-slate-900">Admin Authorization Required</h1>
+          <p className="text-sm text-slate-500 max-w-md mx-auto">
+            {currentUser
+              ? `You are currently logged in as ${currentUser.name} (${currentUser.role.replace(/_/g, ' ')}), which does not have administrative access rights.`
+              : 'You must be signed in as an Administrator to view and manage the QuickBite System Control Center.'}
+          </p>
+        </div>
+        <div className="flex items-center justify-center gap-3 pt-2">
+          {!currentUser ? (
+            <button
+              onClick={() => openAuthModal('login', 'Please sign in with an Administrator account.')}
+              className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl text-xs font-bold flex items-center gap-2 shadow-lg shadow-purple-600/30 transition-all hover:scale-105"
+            >
+              <LogIn className="w-4 h-4" /> Sign In as Admin
+            </button>
+          ) : null}
+          <Link
+            href="/"
+            className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl text-xs font-bold flex items-center gap-2 transition-all"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back to Home
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 pb-20">

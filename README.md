@@ -120,7 +120,16 @@ npm run build
 ```
 
 ### Vercel Deployment
-1. Push your cloned repository branch to your own GitHub/GitLab account.
-2. Log in to [Vercel](https://vercel.com) and import the project.
-3. If connecting to a live database (e.g., Neon or Supabase), add your `DATABASE_URL` as an environment variable.
-4. Deploy. Vercel will automatically compile the serverless routes.
+1. Push your repository to GitHub.
+2. Import the project in [Vercel](https://vercel.com) once and add the production environment variables, including `DATABASE_URL`.
+3. Add these GitHub repository secrets under **Settings > Secrets and variables > Actions**:
+- `DATABASE_URL`: Supabase PostgreSQL connection string used by Prisma.
+- `VERCEL_TOKEN`: Vercel account token.
+- `VERCEL_ORG_ID`: Vercel team/user id.
+- `VERCEL_PROJECT_ID`: Vercel project id.
+4. Push to `main` or `master`. GitHub Actions will run `prisma db push --skip-generate` against Supabase first, then deploy the same commit to Vercel.
+
+You can also run the same schema update locally with:
+```bash
+npm run prisma:deploy
+```

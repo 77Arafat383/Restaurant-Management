@@ -16,14 +16,18 @@ import {
   Eye,
   Search,
   Trash2,
-  LogIn
+  LogIn,
+  Printer
 } from 'lucide-react';
+import ThermalReceiptModal from '@/components/orders/ThermalReceiptModal';
 
 export default function OrdersHistoryPage() {
   const { currentUser, openAuthModal } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedThermalOrder, setSelectedThermalOrder] = useState<Order | null>(null);
+  const [isThermalModalOpen, setIsThermalModalOpen] = useState(false);
 
   const handleDeleteOrder = async (orderId: string) => {
     if (!confirm('Are you sure you want to cancel and delete this order? This action cannot be undone.')) return;
@@ -228,6 +232,18 @@ export default function OrdersHistoryPage() {
                     </button>
                   )}
 
+                  <button
+                    onClick={() => {
+                      setSelectedThermalOrder(order);
+                      setIsThermalModalOpen(true);
+                    }}
+                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all hover:scale-105 shrink-0"
+                    title="View or print 80mm POS thermal receipt memo"
+                  >
+                    <Printer className="w-3.5 h-3.5 text-brand-500" />
+                    <span>Receipt (80mm)</span>
+                  </button>
+
                   <Link
                     href={`/orders/${order.id}`}
                     className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold shadow-md shadow-brand-500/20 transition-all hover:scale-105 shrink-0"
@@ -241,6 +257,16 @@ export default function OrdersHistoryPage() {
           ))}
         </div>
       )}
+
+      {/* 80mm Thermal Receipt Modal */}
+      <ThermalReceiptModal
+        order={selectedThermalOrder}
+        isOpen={isThermalModalOpen}
+        onClose={() => {
+          setIsThermalModalOpen(false);
+          setSelectedThermalOrder(null);
+        }}
+      />
     </div>
   );
 }

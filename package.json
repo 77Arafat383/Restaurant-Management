@@ -9,6 +9,7 @@
     "lint": "next lint",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
+    "prisma:deploy": "prisma db push --skip-generate",
     "prisma:seed": "prisma db seed"
   },
   "prisma": {

@@ -183,6 +183,19 @@ class PostgresStore {
     }
   }
 
+  async updateUserPassword(email: string, password: string): Promise<User | null> {
+    try {
+      const user = await prisma.user.update({
+        where: { email: email.toLowerCase() },
+        data: { password },
+        include: { restaurants: true },
+      });
+      return mapUser(user);
+    } catch {
+      return null;
+    }
+  }
+
   async getRestaurants(): Promise<(Restaurant & { foodItems?: FoodItem[] })[]> {
     const restaurants = await prisma.restaurant.findMany({ include: { foodItems: true }, orderBy: { createdAt: 'asc' } });
     return restaurants.map(mapRestaurant);

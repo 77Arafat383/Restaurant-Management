@@ -22,6 +22,15 @@ interface AuthContextType {
   }) => Promise<{ success: boolean; error?: string; pendingApproval?: boolean }>;
   logout: () => void;
   switchRole: (role: UserRole) => void;
+  updateProfile: (updatedData: {
+    name?: string;
+    phone?: string;
+    address?: string;
+    avatar?: string;
+  }) => Promise<{ success: boolean; error?: string }>;
+  isEditProfileOpen: boolean;
+  openEditProfileModal: () => void;
+  closeEditProfileModal: () => void;
   availableUsers: User[];
 }
 
@@ -31,6 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Start with default customer or check saved session
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [authModalTab, setAuthModalTab] = useState<'login' | 'register'>('login');
   const [authPromptMessage, setAuthPromptMessage] = useState<string | null>(null);
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
@@ -151,6 +161,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const openEditProfileModal = () => {
+    setIsEditProfileOpen(true);
+  };
+
+  const closeEditProfileModal = () => {
+    setIsEditProfileOpen(false);
+  };
+
+  const updateProfile = async (updatedData: {
+    name?: string;
+    phone?: string;
+    address?: string;
+    avatar?: string;
+  }): Promise<{ success: boolean; error?: string }> => {
+    if (!currentUser) return { success: false, error: 'User is not logged in.' };
+    try {
+      const res = await fetch('/api/auth/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: currentUser.id, ...updatedData }),
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        setCurrentUser(data.data);
+        localStorage.setItem('quickbite_user_session', JSON.stringify(data.data));
+        setAvailableUsers(prev => prev.map(u => u.id === data.data.id ? data.data : u));
+        return { success: true };
+      } else {
+        return { success: false, error: data.error || 'Failed to update profile.' };
+      }
+    } catch (err) {
+      return { success: false, error: 'Network error occurred.' };
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -165,6 +210,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         register,
         logout,
         switchRole,
+        updateProfile,
+        isEditProfileOpen,
+        openEditProfileModal,
+        closeEditProfileModal,
         availableUsers,
       }}
     >

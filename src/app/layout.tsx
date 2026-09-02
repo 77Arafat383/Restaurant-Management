@@ -6,6 +6,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import CartDrawer from '@/components/cart/CartDrawer';
 import AuthModal from '@/components/auth/AuthModal';
+import EditProfileModal from '@/components/auth/EditProfileModal';
 
 export const metadata: Metadata = {
   title: 'QuickBite | Fast & Delicious Food Delivery',
@@ -37,6 +38,7 @@ export default function RootLayout({
             <Footer />
             <CartDrawer />
             <AuthModal />
+            <EditProfileModal />
           </CartProvider>
         </AuthProvider>
       </body>

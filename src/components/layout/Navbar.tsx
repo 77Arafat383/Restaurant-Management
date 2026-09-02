@@ -17,11 +17,12 @@ import {
   ChevronDown,
   LogOut,
   LogIn,
-  UserPlus
+  UserPlus,
+  Settings
 } from 'lucide-react';
 
 export default function Navbar() {
-  const { currentUser, logout, openAuthModal } = useAuth();
+  const { currentUser, logout, openAuthModal, openEditProfileModal } = useAuth();
   const { totalItems, setIsCartOpen } = useCart();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const pathname = usePathname();
@@ -75,11 +76,10 @@ export default function Navbar() {
             <Link
               href="/"
               onClick={() => setActiveLink('/')}
-              className={`px-3.5 py-2 rounded-xl transition-all ${
-                activeLink === '/'
-                  ? 'bg-brand-50 text-brand-600'
-                  : 'bg-slate-100 text-slate-700 hover:bg-brand-50 hover:text-brand-600'
-              }`}
+              className={`px-3.5 py-2 rounded-xl transition-all ${activeLink === '/'
+                ? 'bg-brand-50 text-brand-600'
+                : 'bg-slate-100 text-slate-700 hover:bg-brand-50 hover:text-brand-600'
+                }`}
             >
               Restaurants
             </Link>
@@ -87,11 +87,10 @@ export default function Navbar() {
             <Link
               href="/about#about"
               onClick={() => setActiveLink('/about#about')}
-              className={`px-3.5 py-2 rounded-xl transition-all ${
-                activeLink === '/about#about'
-                  ? 'bg-brand-50 text-brand-600'
-                  : 'bg-slate-100 text-slate-700 hover:bg-brand-50 hover:text-brand-600'
-              }`}
+              className={`px-3.5 py-2 rounded-xl transition-all ${activeLink === '/about#about'
+                ? 'bg-brand-50 text-brand-600'
+                : 'bg-slate-100 text-slate-700 hover:bg-brand-50 hover:text-brand-600'
+                }`}
             >
               About Us
             </Link>
@@ -99,11 +98,10 @@ export default function Navbar() {
             <Link
               href="/about#contact"
               onClick={() => setActiveLink('/about#contact')}
-              className={`px-3.5 py-2 rounded-xl transition-all ${
-                activeLink === '/about#contact'
-                  ? 'bg-brand-50 text-brand-600'
-                  : 'bg-slate-100 text-slate-700 hover:bg-brand-50 hover:text-brand-600'
-              }`}
+              className={`px-3.5 py-2 rounded-xl transition-all ${activeLink === '/about#contact'
+                ? 'bg-brand-50 text-brand-600'
+                : 'bg-slate-100 text-slate-700 hover:bg-brand-50 hover:text-brand-600'
+                }`}
             >
               Contact
             </Link>
@@ -113,22 +111,20 @@ export default function Navbar() {
                 <Link
                   href="/orders"
                   onClick={() => setActiveLink('/orders')}
-                  className={`px-3.5 py-2 rounded-xl transition-all ${
-                    activeLink === '/orders'
-                      ? 'bg-brand-50 text-brand-600'
-                      : 'bg-slate-100 text-slate-700 hover:bg-brand-50 hover:text-brand-600'
-                  }`}
+                  className={`px-3.5 py-2 rounded-xl transition-all ${activeLink === '/orders'
+                    ? 'bg-brand-50 text-brand-600'
+                    : 'bg-slate-100 text-slate-700 hover:bg-brand-50 hover:text-brand-600'
+                    }`}
                 >
                   My Orders
                 </Link>
                 <Link
                   href="/orders/order_1001"
                   onClick={() => setActiveLink('/orders/order_1001')}
-                  className={`px-3.5 py-2 rounded-xl border border-emerald-200/50 transition-all flex items-center gap-1.5 ${
-                    activeLink === '/orders/order_1001'
-                      ? 'bg-emerald-100 text-emerald-800'
-                      : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700'
-                  }`}
+                  className={`px-3.5 py-2 rounded-xl border border-emerald-200/50 transition-all flex items-center gap-1.5 ${activeLink === '/orders/order_1001'
+                    ? 'bg-emerald-100 text-emerald-800'
+                    : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700'
+                    }`}
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                   Live Tracking
@@ -140,11 +136,10 @@ export default function Navbar() {
               <Link
                 href="/restaurant"
                 onClick={() => setActiveLink('/restaurant')}
-                className={`px-3.5 py-2 rounded-xl border border-amber-200/50 transition-all flex items-center gap-1.5 ${
-                  activeLink === '/restaurant'
-                    ? 'bg-amber-100 text-amber-800'
-                    : 'bg-amber-50 hover:bg-amber-100 text-amber-700'
-                }`}
+                className={`px-3.5 py-2 rounded-xl border border-amber-200/50 transition-all flex items-center gap-1.5 ${activeLink === '/restaurant'
+                  ? 'bg-amber-100 text-amber-800'
+                  : 'bg-amber-50 hover:bg-amber-100 text-amber-700'
+                  }`}
               >
                 <Store className="w-3.5 h-3.5" /> Kitchen Portal
               </Link>
@@ -153,11 +148,10 @@ export default function Navbar() {
               <Link
                 href="/delivery"
                 onClick={() => setActiveLink('/delivery')}
-                className={`px-3.5 py-2 rounded-xl border border-blue-200/50 transition-all flex items-center gap-1.5 ${
-                  activeLink === '/delivery'
-                    ? 'bg-blue-100 text-blue-800'
-                    : 'bg-blue-50 hover:bg-blue-100 text-blue-700'
-                }`}
+                className={`px-3.5 py-2 rounded-xl border border-blue-200/50 transition-all flex items-center gap-1.5 ${activeLink === '/delivery'
+                  ? 'bg-blue-100 text-blue-800'
+                  : 'bg-blue-50 hover:bg-blue-100 text-blue-700'
+                  }`}
               >
                 <Bike className="w-3.5 h-3.5" /> Rider Portal
               </Link>
@@ -166,11 +160,10 @@ export default function Navbar() {
               <Link
                 href="/admin"
                 onClick={() => setActiveLink('/admin')}
-                className={`px-3.5 py-2 rounded-xl border border-purple-200/50 transition-all flex items-center gap-1.5 ${
-                  activeLink === '/admin'
-                    ? 'bg-purple-100 text-purple-800'
-                    : 'bg-purple-50 hover:bg-purple-100 text-purple-700'
-                }`}
+                className={`px-3.5 py-2 rounded-xl border border-purple-200/50 transition-all flex items-center gap-1.5 ${activeLink === '/admin'
+                  ? 'bg-purple-100 text-purple-800'
+                  : 'bg-purple-50 hover:bg-purple-100 text-purple-700'
+                  }`}
               >
                 <ShieldCheck className="w-3.5 h-3.5" /> Admin Console
               </Link>
@@ -211,7 +204,7 @@ export default function Navbar() {
                       onClick={() => setIsDropdownOpen(false)}
                     />
                     <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 z-40 animate-fade-in">
-                      <div className="px-4 py-2 border-b border-slate-100">
+                      <div className="px-4 py-2.5 border-b border-slate-100">
                         <p className="text-xs font-bold text-slate-900 truncate">{currentUser.name}</p>
                         <p className="text-[11px] text-slate-500 truncate">{currentUser.email}</p>
                         <span className="inline-block mt-1 px-2 py-0.5 bg-brand-50 text-brand-600 rounded text-[10px] font-black uppercase">
@@ -220,6 +213,17 @@ export default function Navbar() {
                       </div>
 
                       <div className="py-1 text-xs text-slate-700 font-semibold">
+                        <button
+                          onClick={() => {
+                            openEditProfileModal();
+                            setIsDropdownOpen(false);
+                          }}
+                          className="w-full flex items-center gap-2 px-4 py-2 hover:bg-slate-50 hover:text-brand-600 transition-colors text-left font-semibold"
+                        >
+                          <UserIcon className="w-3.5 h-3.5 text-brand-500" />
+                          <span>Edit Profile</span>
+                        </button>
+
                         <button
                           onClick={() => {
                             setIsCartOpen(true);

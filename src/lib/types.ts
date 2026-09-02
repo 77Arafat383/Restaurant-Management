@@ -1,3 +1,5 @@
+export const DEFAULT_UNISEX_AVATAR = 'https://api.dicebear.com/7.x/bottts-neutral/svg?seed=QuickBiteUser';
+
 export type UserRole = 'CUSTOMER' | 'RESTAURANT_MANAGER' | 'DELIVERY_PERSON' | 'ADMIN';
 
 export type OrderStatus = 

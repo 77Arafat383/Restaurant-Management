@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { User, UserRole } from '@/lib/types';
+import { User, UserRole, DEFAULT_UNISEX_AVATAR } from '@/lib/types';
 
 export async function POST(req: Request) {
   try {
@@ -38,7 +38,7 @@ export async function POST(req: Request) {
       address: address?.trim() || 'Dhaka, Bangladesh',
       role: assignedRole,
       isApproved: isPartner ? false : true,
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name.trim())}`,
+      avatar: DEFAULT_UNISEX_AVATAR,
     };
 
     const savedUser = await db.createUser(newUser);

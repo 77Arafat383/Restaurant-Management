@@ -7,6 +7,7 @@ import {
   PaymentStatus,
   Restaurant,
   User,
+  DEFAULT_UNISEX_AVATAR,
 } from './types';
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
@@ -156,7 +157,7 @@ class PostgresStore {
         phone: user.phone,
         address: user.address,
         role: user.role,
-        avatar: user.avatar,
+        avatar: user.avatar || DEFAULT_UNISEX_AVATAR,
         restaurantId: user.restaurantId,
         isApproved: user.isApproved ?? true,
       },
@@ -188,6 +189,25 @@ class PostgresStore {
       const user = await prisma.user.update({
         where: { email: email.toLowerCase() },
         data: { password },
+        include: { restaurants: true },
+      });
+      return mapUser(user);
+    } catch {
+      return null;
+    }
+  }
+
+  async updateUserProfile(id: string, updates: Partial<User>): Promise<User | null> {
+    try {
+      const data: Record<string, any> = {};
+      if (updates.name !== undefined) data.name = updates.name.trim();
+      if (updates.phone !== undefined) data.phone = updates.phone.trim();
+      if (updates.address !== undefined) data.address = updates.address.trim();
+      if (updates.avatar !== undefined) data.avatar = updates.avatar;
+
+      const user = await prisma.user.update({
+        where: { id },
+        data,
         include: { restaurants: true },
       });
       return mapUser(user);

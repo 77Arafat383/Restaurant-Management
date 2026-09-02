@@ -8,7 +8,7 @@
       "role": "CUSTOMER",
       "phone": "+880 1711-223344",
       "address": "House 42, Road 11, Dhanmondi, Dhaka",
-      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"
+      "avatar": "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=QuickBiteUser"
     },
     {
       "id": "user_rest_1",
@@ -18,7 +18,7 @@
       "role": "RESTAURANT_MANAGER",
       "phone": "+880 1819-556677",
       "address": "Gulshan 2, Dhaka",
-      "avatar": "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=150&auto=format&fit=crop&q=80",
+      "avatar": "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=QuickBiteUser",
       "restaurantId": "rest_1"
     },
     {
@@ -29,7 +29,7 @@
       "role": "DELIVERY_PERSON",
       "phone": "+880 1912-334455",
       "address": "Mohakhali, Dhaka",
-      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80"
+      "avatar": "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=QuickBiteUser"
     },
     {
       "id": "user_admin_1",
@@ -39,7 +39,7 @@
       "role": "ADMIN",
       "phone": "+880 1700-000000",
       "address": "NSTU Campus, Noakhali",
-      "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80"
+      "avatar": "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=QuickBiteUser"
     },
     {
       "id": "user_1788027865188_807",
@@ -49,7 +49,7 @@
       "phone": "+880 1788-112233",
       "address": "Uttara Sector 11, Dhaka",
       "role": "CUSTOMER",
-      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Fahim%20Hasan"
+      "avatar": "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=QuickBiteUser"
     },
     {
       "id": "user_1788037144333_677",
@@ -60,7 +60,7 @@
       "address": "House 412, Road 11, Dhanmondi, Dhaka, Dhaka",
       "role": "DELIVERY_PERSON",
       "isApproved": true,
-      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Tanvir%20Ahmed"
+      "avatar": "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=QuickBiteUser"
     },
     {
       "id": "user_1788037477538_615",
@@ -71,7 +71,7 @@
       "address": "Housing, Maijdee, Noakhali, Chattogram",
       "role": "ADMIN",
       "isApproved": true,
-      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Nusrat%20Jahan"
+      "avatar": "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=QuickBiteUser"
     },
     {
       "id": "user_1788057473360_240",
@@ -82,7 +82,7 @@
       "address": "Housing, Maijdee, Noakhali, Chattogram",
       "role": "RESTAURANT_MANAGER",
       "isApproved": true,
-      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Ahmed"
+      "avatar": "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=QuickBiteUser"
     },
     {
       "id": "user_1788057505524_747",
@@ -93,7 +93,7 @@
       "address": "Housing, Maijdee, Noakhali, Chattogram",
       "role": "DELIVERY_PERSON",
       "isApproved": true,
-      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Mahmud"
+      "avatar": "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=QuickBiteUser"
     },
     {
       "id": "user_1788057846839_666",
@@ -104,7 +104,7 @@
       "address": "Housing, Maijdee, Noakhali, Chattogram",
       "role": "CUSTOMER",
       "isApproved": true,
-      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Maknoon"
+      "avatar": "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=QuickBiteUser"
     }
   ],
   "restaurants": [

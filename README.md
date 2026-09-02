@@ -127,6 +127,7 @@ npm run build
 - `VERCEL_TOKEN`: Vercel account token.
 - `VERCEL_ORG_ID`: Vercel team/user id.
 - `VERCEL_PROJECT_ID`: Vercel project id.
+- `VERCEL_PROJECT_NAME`: Vercel project name (e.g. `quick_bite`).
 4. Push to `main` or `master`. GitHub Actions will run `prisma db push --skip-generate` against Supabase first, then deploy the same commit to Vercel.
 
 You can also run the same schema update locally with:
